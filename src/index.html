@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midas USD Yatırım İşlemleri Vergi Hesaplayıcı</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Font Awesome için CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>Midas USD Yatırım İşlemleri Vergi Hesaplayıcı</h1>
+        </div>
+
+        <div class="controls-container">
+            <div class="control-group">
+                <label for="vergiDonemi">Vergi Dönemi:</label>
+                <select id="vergiDonemi">
+                    <option value="2023">2023</option>
+                    <option value="2024" selected>2024</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="vergiOrani">Vergi Oranı (%):</label>
+                <input type="number" id="vergiOrani" value="35" min="0" max="100" step="1" style="width: 80px;">
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <label for="uploadPdf" class="file-upload-label">
+                <i class="fas fa-upload"></i> Midas Ekstrelerini Yükle
+            </label>
+            <input type="file" id="uploadPdf" multiple disabled />
+        </div>
+        <div class="actions-section">
+            <div class="button-container">
+                <button onclick="downloadCSV()" class="download-button">
+                    <i class="fas fa-file-csv"></i> CSV İndir
+                </button>
+                <button onclick="downloadExcel()" class="download-button">
+                    <i class="fas fa-file-excel"></i> Excel İndir
+                </button>
+            </div>
+
+            <div class="button-container">
+                <a href="https://www.buymeacoffee.com/umuterturk" target="_blank" class="coffee-button" id="coffeeButton1" title="Sence de hak etmedim mi?">
+                    <i class="fas fa-coffee"></i>Destek ol, birlikte daha iyisini yapalım
+                </a>
+            </div>
+        </div>
+
+        <div id="tableContainer"></div>
+
+
+        <div class="privacy-notice">
+            <p><i class="fas fa-leaf"></i> Gizlilik ve Güvenlik</p>
+            <p>
+                <span><i class="fas fa-desktop"></i> Yüklediğiniz dosyalar ve hesaplama verileri kesinlikle herhangi bir sunucuya gönderilmez veya depolanmaz tüm işlemleri tarayıcınızda gerçekleştirir.</span>
+                <span><i class="fas fa-user-shield"></i> Tüm verileriniz yalnızca sizin cihazınızda kalır ve tarayıcı sekmesini kapattığınızda tamamen silinir.</span>
+                <span><i class="fas fa-code-branch"></i> Açık kaynak kodlu bir uygulama olduğu için herhangi bir gizlilik politikası yoktur.</span>
+            </p>
+        </div>
+
+        <div class="disclaimer">
+            <p>Sorumluluk Reddi Beyanı:</p>
+            <p>Bu araç sadece bilgilendirme amaçlıdır ve herhangi bir resmi veya yasal tavsiye niteliği taşımamaktadır. 
+            Yapılan hesaplamalar tahmini değerler olup, kesin sonuçlar için lütfen mali müşavirinize veya vergi danışmanınıza başvurunuz. 
+            Bu aracı kullanarak elde edilen sonuçlardan doğabilecek herhangi bir hatadan veya zarardan dolayı sorumluluk kabul edilmemektedir.</p>
+            
+            <div class="disclaimer-checkbox">
+                <input type="checkbox" id="disclaimerAccept" required>
+                <label for="disclaimerAccept">Sorumluluk reddi beyanını okudum ve kabul ediyorum. Bu onay tarayıcınızda saklanacak ve 30 gün boyunca tekrar sorulmayacaktır.</label>
+            </div>
+        </div>
+
+        <div class="report-issue-footer">
+            <p><i class="fas fa-bug"></i> Hata ve <i class="fas fa-lightbulb"></i>Önerileriniz için</p>
+            <div class="report-options">
+                <a href="https://github.com/umuterturk/vergi-hesaplayici/issues" target="_blank" class="report-button">
+                    <i class="fab fa-github"></i> GitHub Issues (Önerilen)
+                </a>
+                <span class="report-divider">veya</span>
+                <a href="mailto:umutert@gmail.com?subject=Vergi%20Hesaplayıcı%20Hata%20Bildirimi" class="report-button">
+                    <i class="fas fa-envelope"></i> umutert@gmail.com
+                </a>
+            </div>
+        </div>
+
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <p><i class="fas fa-exclamation-circle"></i> Devam etmek için lütfen önce sorumluluk reddi beyanını okuyup kabul ediniz.</p>
+                <button onclick="closePopup()" class="popup-close">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="js/vergi_hesaplayici.js"></script>
+</body>
+</html>

@@ -332,15 +332,15 @@ input[type="file"] {
 .privacy-notice {
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #e7f5ff;
+    background-color: #e8f5e9;
     border-radius: 8px;
-    border: 1px solid #b8daff;
+    border: 1px solid #a5d6a7;
 }
 
 .privacy-notice p:first-child {
     font-weight: bold;
     margin-bottom: 10px;
-    color: #004085;
+    color: #2e7d32;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -349,12 +349,28 @@ input[type="file"] {
 .privacy-notice p:last-child {
     font-size: 14px;
     line-height: 1.5;
-    color: #004085;
+    color: #1b5e20;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.privacy-notice i {
+.privacy-notice p:last-child span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.privacy-notice p:last-child i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.privacy-notice p:first-child i {
     font-size: 18px;
+    color: #43a047;
 }
 
 .reset-disclaimer {
