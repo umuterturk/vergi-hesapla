@@ -1,18 +1,21 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
-    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+    min-height: 100vh;
 }
 
 .controls-container {
-    background-color: white;
-    padding: 20px;
+    background-color: #f8f9fa;
+    padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
+    justify-content: space-between;
 }
 
 .control-group {
@@ -82,25 +85,29 @@ tr:hover {
 
 .summary-container {
     margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
+    padding: 20px;
+    background-color: #fff;
     border-radius: 8px;
     display: flex;
     justify-content: space-around;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 30px;
     position: sticky;
-    top: 0;
+    top: 20px;
     z-index: 2;
-    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
 }
 
 .summary-container strong {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
+    gap: 12px;
+    font-size: 15px;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
 }
 
 .positive-value {
@@ -173,11 +180,12 @@ tr:hover {
 }
 
 .disclaimer {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f8f9fa;
+    margin: 30px 0;
+    padding: 25px;
+    background-color: #fff;
     border-radius: 8px;
     border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .disclaimer.accepted .disclaimer-title,
@@ -219,17 +227,25 @@ tr:hover {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 .header {
     text-align: center;
     margin-bottom: 30px;
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .header h1 {
     color: #333;
-    font-size: 24px;
+    font-size: 28px;
     margin: 0;
+    font-weight: 600;
 }
 
 .upload-section {
@@ -335,9 +351,10 @@ input[type="file"] {
 }
 
 .privacy-notice {
-    margin-bottom: 20px;
-    padding: 10px;
+    margin: 30px 0;
+    padding: 20px;
     border-radius: 8px;
+    background-color: #f1f8f1;
     border: 1px solid #a5d6a7;
 }
 
@@ -478,14 +495,24 @@ input[type="file"] {
 }
 
 @media screen and (max-width: 768px) {
-    /* Ana container'ın padding'ini mobilde sıfırla */
     .main-container {
         padding: 0;
         max-width: 100%;
         width: 100%;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    .controls-container {
+        flex-direction: column;
+    }
+    
+    .control-group {
+        width: 100%;
     }
 
-    /* Actions section'ı düzenle */
     .actions-section {
         margin: 20px 0;
         padding: 0 20px;
@@ -493,7 +520,6 @@ input[type="file"] {
         box-sizing: border-box;
     }
 
-    /* Buton container'ı ve butonları düzenle */
     .actions-section .button-container {
         flex-direction: column;
         width: 100%;
@@ -509,7 +535,6 @@ input[type="file"] {
         margin: 0;
     }
 
-    /* Diğer container'ların kenar boşluklarını düzenle */
     .controls-container,
     .upload-section,
     .privacy-notice,
@@ -519,12 +544,10 @@ input[type="file"] {
         width: auto;
     }
 
-    /* Header'ı düzenle */
     .header {
         padding: 20px;
     }
 
-    /* Tablo ve özet bölümü için özel stiller */
     #tableContainer {
         margin: 0;
         width: 100%;
@@ -549,15 +572,12 @@ input[type="file"] {
         box-sizing: border-box;
     }
 
-    /* Tablo kolonlarını düzenle */
     table th,
     table td {
-        display: none; /* Önce tüm kolonları gizle */
+        display: none;
         padding: 8px 4px;
     }
 
-    /* Sadece gösterilecek kolonlar */
-    /* 1: Tarih, 4: Sembol, 5: İşlem Tipi, 22: Vergiye Tabi Kazanç, 23: Vergi */
     table th:nth-child(1),
     table td:nth-child(1),
     table th:nth-child(4),
@@ -571,7 +591,6 @@ input[type="file"] {
         display: table-cell;
     }
 
-    /* Vergi ve Vergiye Tabi Kazanç kolonları için stil */
     table th:nth-child(22),
     table td:nth-child(22),
     table th:nth-child(23),
