@@ -88,26 +88,34 @@
         }
 
         .summary-container {
-            background-color: white;
-            padding: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border: 1px solid #dee2e6;
         }
 
         .summary-container strong {
-            display: block;
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 16px;
-        }
-
-        .negative-value {
-            color: #dc3545;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
         }
 
         .positive-value {
             color: #28a745;
+        }
+
+        .negative-value {
+            color: #dc3545;
         }
 
         .yiufe-change {
