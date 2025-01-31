@@ -32,20 +32,26 @@ document.getElementById('uploadPdf').addEventListener('change', function(event) 
 document.addEventListener('DOMContentLoaded', function() {
     const disclaimerAccepted = localStorage.getItem('disclaimerAccepted');
     const disclaimerVersion = '1.0';
+    const disclaimerContainer = document.getElementById('disclaimerContainer');
     
     if (disclaimerAccepted === disclaimerVersion) {
         document.getElementById('disclaimerAccept').checked = true;
         document.getElementById('uploadPdf').disabled = false;
+        disclaimerContainer.classList.add('accepted');
     }
 });
 
 document.getElementById('disclaimerAccept').addEventListener('change', function() {
+    const disclaimerContainer = document.getElementById('disclaimerContainer');
+    
     if (this.checked) {
         localStorage.setItem('disclaimerAccepted', '1.0');
         document.getElementById('uploadPdf').disabled = false;
+        disclaimerContainer.classList.add('accepted');
     } else {
         localStorage.removeItem('disclaimerAccepted');
         document.getElementById('uploadPdf').disabled = true;
+        disclaimerContainer.classList.remove('accepted');
     }
 });
 

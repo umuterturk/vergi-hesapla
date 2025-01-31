@@ -128,8 +128,8 @@ tr:hover {
 
 .download-button {
     padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #ffdd00;
+    color: black;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -149,8 +149,8 @@ tr:hover {
 
 .coffee-button {
     padding: 10px 20px;
-    background-color: #FFDD00;
-    color: #000000;
+    background-color: #4CAF50;
+    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -180,13 +180,18 @@ tr:hover {
     border: 1px solid #dee2e6;
 }
 
-.disclaimer p:first-child {
+.disclaimer.accepted .disclaimer-title,
+.disclaimer.accepted .disclaimer-text {
+    display: none;
+}
+
+.disclaimer-title {
     font-weight: bold;
     margin-bottom: 10px;
     color: #495057;
 }
 
-.disclaimer p {
+.disclaimer-text {
     font-size: 14px;
     line-height: 1.5;
     color: #6c757d;
@@ -332,7 +337,6 @@ input[type="file"] {
 .privacy-notice {
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #e8f5e9;
     border-radius: 8px;
     border: 1px solid #a5d6a7;
 }
