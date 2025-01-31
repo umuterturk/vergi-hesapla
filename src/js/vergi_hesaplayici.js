@@ -378,7 +378,13 @@ class FifoCalculator {
     }
 }
 
+// Global değişken olarak tanımla
+let lastProcessedData = null;
+
 function displayTable(data) {
+    // Veriyi global değişkende sakla
+    lastProcessedData = data;
+    
     const calculator = new FifoCalculator();
     const vergiDonemi = document.getElementById('vergiDonemi').value;
     const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
@@ -508,7 +514,7 @@ function createTableHeader() {
     return `<table>
         <thead>
             <tr>
-                <th colspan="22" style="text-align: center; background-color: #e6e6e6;">
+                <th colspan="23" style="text-align: center; background-color: #e6e6e6;">
                     USD BAZLI YATIRIM İŞLEMLERİ ${vergiDonemi} YILI
                 </th>
             </tr>
@@ -535,6 +541,7 @@ function createTableHeader() {
                 <th>Nominal Alım Tutarı (TL)</th>
                 <th>Reel Alım Tutarı (TL)</th>
                 <th>Vergiye Tabi Kazanç (TL)</th>
+                <th>Vergi (TL)</th>
             </tr>
         </thead>
         <tbody>`;
@@ -630,6 +637,31 @@ function createTableRow(transaction) {
         }
     }
     
+    // Vergi hesaplama
+    const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
+    const vergiDonemi = document.getElementById('vergiDonemi').value;
+    let vergiTutari = '-';
+    
+    if (isSale) {
+        const [day, month, year] = transaction[0].split(' ')[0].split('/');
+        const satisYili = "20" + year;
+        
+        if (vergiyeTabiKazanc !== '-' && parseFloat(vergiyeTabiKazanc) > 0) {
+            if (satisYili === vergiDonemi) {
+                vergiTutari = (parseFloat(vergiyeTabiKazanc) * vergiOrani).toFixed(2);
+            } else {
+                vergiTutari = `0 (${vergiDonemi} için)`;
+            }
+        } else if (vergiyeTabiKazanc !== '-') {
+            vergiTutari = '0.00';
+        }
+    }
+
+    // Vergi tutarı için stil belirleme
+    const vergiStyle = vergiTutari !== '-' && !vergiTutari.includes('için') && parseFloat(vergiTutari) > 0 
+        ? 'style="color: #dc3545; font-weight: bold;"' 
+        : '';
+
     return `<tr>
         <td>${transaction[0]}</td>
         <td>${isSale ? transaction.vergiDonemi : '-'}</td>
@@ -653,29 +685,14 @@ function createTableRow(transaction) {
         <td>${nominalBuyValue}</td>
         <td>${reelBuyValue}</td>
         <td>${vergiyeTabiKazanc}</td>
+        <td ${vergiStyle}>${vergiTutari}</td>
     </tr>`;
 }
 
 // Vergi dönemi değiştiğinde tabloyu güncelle
 document.getElementById('vergiDonemi').addEventListener('change', function() {
-    const files = document.getElementById('uploadPdf').files;
-    if (files.length > 0) {
-        let allData = [];
-        let processedFiles = 0;
-
-        for (let file of files) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                extractInvestmentTable(reader.result, allData, () => {
-                    processedFiles++;
-                    if (processedFiles === files.length) {
-                        allData.sort((a, b) => parseDate(a[0]) - parseDate(b[0]));
-                        displayTable(allData);
-                    }
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        }
+    if (lastProcessedData) {
+        displayTable(lastProcessedData);
     }
 });
 
@@ -793,4 +810,43 @@ function showError(message) {
             <p>şuraya mail atabilirsiniz: <a href="mailto:umuterturk@gmail.com">umuterturk@gmail.com</a></p>
         </div>
     `;
+}
+
+function calculateTax(row, vergiDonemi) {
+    // ... existing code ...
+
+    // Satış yılı kontrolü
+    const satisYili = new Date(row.Tarih).getFullYear();
+    if (satisYili != vergiDonemi) {
+        return `0 (${vergiDonemi} için)`;
+    }
+
+    // Vergi hesaplama mantığı
+    const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
+    const kar = row.Kar;
+    const vergi = kar * vergiOrani;
+
+    return vergi.toFixed(2);
+}
+
+function createTable(data) {
+    // ... existing code ...
+
+    // Tablo satırlarını oluştur
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        // ... other columns ...
+
+        // Vergi kolonu için
+        const vergiCell = document.createElement('td');
+        const vergiDonemi = document.getElementById('vergiDonemi').value;
+        const vergiDegeri = calculateTax(row, vergiDonemi);
+        vergiCell.textContent = vergiDegeri;
+        tr.appendChild(vergiCell);
+
+        // ... rest of the code ...
+    });
+
+    // ... existing code ...
 }

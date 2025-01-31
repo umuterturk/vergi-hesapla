@@ -463,6 +463,72 @@
             color: #adb5bd;
             font-size: 11px;
         }
+
+        @media screen and (max-width: 768px) {
+            /* Ana container'ın padding'ini mobilde sıfırla */
+            .main-container {
+                padding: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            /* Tablo container'ı tam genişlikte olsun */
+            #tableContainer {
+                margin: 0;
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            /* Tablo stillerini güncelle */
+            table {
+                margin: 0;
+                width: 100%;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            /* Summary container'ı tam genişlikte olsun */
+            .summary-container {
+                margin: 0;
+                padding: 15px 0;
+                border-radius: 0;
+                width: 100%;
+                border-left: none;
+                border-right: none;
+            }
+
+            /* Diğer container'ların padding'lerini ayarla */
+            .controls-container,
+            .upload-section,
+            .actions-section,
+            .privacy-notice,
+            .disclaimer,
+            .report-issue-footer {
+                margin: 20px;
+            }
+
+            /* Header'ı düzenle */
+            .header {
+                padding: 20px;
+            }
+
+            /* Tablo hücrelerinin padding'ini ayarla */
+            th, td {
+                padding: 8px 4px;
+            }
+
+            /* Gizlenecek kolonlar aynı kalsın */
+            th:not(:nth-child(1)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(22)):not(:nth-child(23)),
+            td:not(:nth-child(1)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(22)):not(:nth-child(23)) {
+                display: none;
+            }
+
+            /* Vergi kolonu için stil */
+            th:nth-child(23), td:nth-child(23) {
+                min-width: 80px;
+            }
+        }
     </style>
     <!-- Font Awesome için CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -484,7 +550,7 @@
 
             <div class="control-group">
                 <label for="vergiOrani">Vergi Oranı (%):</label>
-                <input type="number" id="vergiOrani" value="15" min="0" max="100" step="1" style="width: 80px;">
+                <input type="number" id="vergiOrani" value="35" min="0" max="100" step="1" style="width: 80px;">
             </div>
         </div>
 
