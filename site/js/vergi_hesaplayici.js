@@ -513,6 +513,12 @@ function displayTable(data) {
 
     // Önce özet, sonra tablo olacak şekilde HTML'i yerleştir
     document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
+
+    // Download butonlarını göster/gizle
+    const downloadButtons = document.querySelectorAll('.download-button');
+    downloadButtons.forEach(button => {
+        button.style.display = allTransactions.length > 0 ? 'inline-block' : 'none';
+    });
 }
 
 function createTableHeader() {
@@ -521,7 +527,7 @@ function createTableHeader() {
         <thead>
             <tr>
                 <th colspan="23" style="text-align: center; background-color: #e6e6e6;">
-                    USD BAZLI YATIRIM İŞLEMLERİ ${vergiDonemi} YILI
+                    USD BAZLI YATIRIM İŞLEMLERİ ${vergiDonemi}
                 </th>
             </tr>
             <tr>
@@ -532,7 +538,7 @@ function createTableHeader() {
                 <th>İşlem Tipi</th>
                 <th>İşlem Durumu</th>
                 <th>Para Birimi</th>
-                <th>Gerçekleşen Adet</th>
+                <th>Adet</th>
                 <th>Ortalama İşlem Fiyatı (USD)</th>
                 <th>İşlem Ücreti (USD)</th>
                 <th>İşlem Tutarı (USD)</th>
@@ -668,6 +674,11 @@ function createTableRow(transaction) {
         ? 'style="color: #dc3545; font-weight: bold;"' 
         : '';
 
+    // Adet değerini tabloda gösterirken 2 hane, veri olarak tam haliyle sakla
+    const amount = isSale ? transaction.amount : transaction[8];
+    const displayAmount = formatNumber(amount, 2);
+    const actualAmount = amount;  // Orijinal değeri koru
+
     return `<tr>
         <td>${transaction[0]}</td>
         <td>${isSale ? transaction.vergiDonemi : '-'}</td>
@@ -676,7 +687,7 @@ function createTableRow(transaction) {
         <td>${transaction[3]}</td>
         <td>${transaction[4]}</td>
         <td>${transaction[5] || 'USD'}</td>
-        <td>${isSale ? formatNumber(transaction.amount, 8) : formatNumber(transaction[8], 8)}</td>
+        <td data-value="${actualAmount}">${displayAmount}</td>
         <td>${formatNumber(transaction[9])}</td>
         <td>${formatNumber(transaction[10] || 0)}</td>
         <td>${islemTutariUSD}</td>
@@ -759,9 +770,17 @@ function downloadCSV() {
     // Verileri al
     table.querySelectorAll('tbody tr').forEach(row => {
         const rowData = [];
-        row.querySelectorAll('td').forEach(cell => {
+        row.querySelectorAll('td').forEach((cell, index) => {
+            // Adet kolonu için data-value kullan
+            let value;
+            if (index === 7) { // Adet kolonu
+                value = cell.getAttribute('data-value') || cell.textContent;
+            } else {
+                value = cell.textContent;
+            }
+            
             // Virgülleri ve tırnak işaretlerini kontrol et
-            let value = cell.textContent.replace(/"/g, '""');
+            value = value.replace(/"/g, '""');
             if (value.includes(',')) {
                 value = `"${value}"`;
             }
@@ -786,11 +805,22 @@ function downloadExcel() {
     const vergiDonemi = document.getElementById('vergiDonemi').value;
     const wb = XLSX.utils.book_new();
     
-    // Başlık satırını atla ve verileri al
-    const ws = XLSX.utils.table_to_sheet(table, {
-        raw: true,
-        display: false
+    // Tabloyu işle ve Adet kolonunu data-value'dan al
+    const rows = [];
+    const headerRow = Array.from(table.querySelectorAll('tr:nth-child(2) th')).map(th => th.textContent);
+    rows.push(headerRow);
+    
+    table.querySelectorAll('tbody tr').forEach(tr => {
+        const row = Array.from(tr.querySelectorAll('td')).map((td, index) => {
+            if (index === 7) { // Adet kolonu
+                return td.getAttribute('data-value') || td.textContent;
+            }
+            return td.textContent;
+        });
+        rows.push(row);
     });
+    
+    const ws = XLSX.utils.aoa_to_sheet(rows);
     
     // Excel dosyasını oluştur
     XLSX.utils.book_append_sheet(wb, ws, 'USD Bazlı Yatırım İşlemleri');
@@ -806,6 +836,12 @@ document.addEventListener('DOMContentLoaded', function() {
             coffeeButton.style.display = 'flex';
         }
     }
+
+    // Download butonlarını başlangıçta gizle
+    const downloadButtons = document.querySelectorAll('.download-button');
+    downloadButtons.forEach(button => {
+        button.style.display = 'none';
+    });
 });
 
 function showError(message) {

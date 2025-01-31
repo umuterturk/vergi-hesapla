@@ -8,7 +8,7 @@ body {
 
 .controls-container {
     background-color: #f8f9fa;
-    padding: 25px;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     margin-bottom: 30px;
@@ -180,9 +180,9 @@ tr:hover {
 }
 
 .disclaimer {
-    margin: 30px 0;
-    padding: 25px;
-    background-color: #fff;
+    margin: 10px 0;
+    padding: 0 25px 15px 25px;
+    background-color: #fff6f6;
     border-radius: 8px;
     border: 1px solid #dee2e6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -197,6 +197,7 @@ tr:hover {
     font-weight: bold;
     margin-bottom: 10px;
     color: #495057;
+    font-size: 15px;
 }
 
 .disclaimer-text {
@@ -237,23 +238,19 @@ tr:hover {
 .header {
     text-align: center;
     margin-bottom: 30px;
-    padding: 20px;
+    padding: 0 20px 10px 20px;
     border-bottom: 1px solid #dee2e6;
 }
 
 .header h1 {
     color: #333;
-    font-size: 28px;
+    font-size: 18px;
     margin: 0;
     font-weight: 600;
 }
 
 .upload-section {
     margin: 20px 0;
-}
-
-.actions-section {
-    margin: 30px 0;
 }
 
 .button-container {
@@ -351,7 +348,8 @@ input[type="file"] {
 }
 
 .privacy-notice {
-    margin: 30px 0;
+    margin-bottom: 0;
+    margin-top: 0;
     padding: 20px;
     border-radius: 8px;
     background-color: #f1f8f1;
@@ -359,6 +357,7 @@ input[type="file"] {
 }
 
 .privacy-notice p:first-child {
+    margin-top: 0;
     font-weight: bold;
     margin-bottom: 10px;
     color: #2e7d32;
@@ -514,7 +513,7 @@ input[type="file"] {
     }
 
     .actions-section {
-        margin: 20px 0;
+        margin-bottom: 12px;
         padding: 0 20px;
         width: 100%;
         box-sizing: border-box;
@@ -524,7 +523,8 @@ input[type="file"] {
         flex-direction: column;
         width: 100%;
         gap: 10px;
-        margin: 10px 0;
+        margin-top: 10px;
+        margin-bottom: 0;
     }
 
     .download-button,
@@ -550,8 +550,8 @@ input[type="file"] {
 
     #tableContainer {
         margin: 0;
-        width: 100%;
-        overflow-x: hidden;
+        overflow-x: auto;
+        overflow-y: visible;
     }
 
     table {
@@ -575,7 +575,7 @@ input[type="file"] {
     table th,
     table td {
         display: none;
-        padding: 8px 4px;
+        white-space: nowrap;
     }
 
     table th:nth-child(1),
@@ -584,17 +584,61 @@ input[type="file"] {
     table td:nth-child(4),
     table th:nth-child(5),
     table td:nth-child(5),
-    table th:nth-child(22),
-    table td:nth-child(22),
     table th:nth-child(23),
     table td:nth-child(23) {
         display: table-cell;
     }
 
-    table th:nth-child(22),
-    table td:nth-child(22),
     table th:nth-child(23),
     table td:nth-child(23) {
         min-width: 80px;
     }
+
+    table th:nth-child(1),
+    table td:nth-child(1) {
+        max-width: 50px;
+        word-wrap: break-word;
+        white-space: normal;
+        padding: 8px 4px;
+        font-size: 13px;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        
+    }
+}
+
+#tableContainer {
+    margin: 20px 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    position: relative;
+}
+
+table thead tr:first-child th,
+table thead tr:nth-child(2) th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f8f9fa;
+}
+
+table thead tr:first-child th {
+    z-index: 3;
+}
+
+/* Belirli kolonları gizle ama verileri koru */
+table th:nth-child(3),  /* İşlem Türü */
+table td:nth-child(3),
+table th:nth-child(6),  /* İşlem Türü */
+table td:nth-child(6),
+table th:nth-child(9),  /* Ortalama İşlem Fiyatı (USD) */
+table td:nth-child(9),
+table th:nth-child(10), /* İşlem Ücreti (USD) */
+table td:nth-child(10),
+table th:nth-child(16), /* Alış Yİ-ÜFE */
+table td:nth-child(16),
+table th:nth-child(18), /* Satış Yİ-ÜFE */
+table td:nth-child(18) {
+    display: none;
 }
