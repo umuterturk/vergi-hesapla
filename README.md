@@ -2,6 +2,11 @@
 
 Bu araç, Midas üzerinden yapılan USD bazlı yatırım işlemlerinin vergi hesaplamalarını kolaylaştırmak için geliştirilmiş açık kaynak kodlu bir web uygulamasıdır.
 
+## 🎥 Tanıtım Videosu
+
+[![Midas USD Yatırım İşlemleri Vergi Hesaplayıcı Tanıtım Videosu](https://i.ytimg.com/vi/b4LHKjrDDUs/oar2.jpg?sqp=-oaymwEdCMwCENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLDp2tveWpFnEDXFcqnkdIHMxryUTg)](https://youtube.com/shorts/b4LHKjrDDUs?si=8XjDyYcban0VN7Kj)
+
+
 ## 🌟 Özellikler
 
 - Midas ekstrelerinden otomatik veri çıkarma
