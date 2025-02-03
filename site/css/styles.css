@@ -733,3 +733,29 @@ table td:nth-child(18) {
 .file-counter i {
     margin-right: 5px;
 }
+
+.table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-top: 20px;
+    position: relative;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.sticky-header th {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sticky-header tr:first-child th {
+    border-bottom: none;
+}
+
+.sticky-header tr:last-child th {
+    border-top: none;
+}

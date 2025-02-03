@@ -509,7 +509,13 @@ function displayTable(data) {
                     ${(totalTaxableProfit * vergiOrani).toFixed(2)}
                 </span>
             </strong>
+            <strong>Vergi Sonrası Toplam Kazanç (TL): 
+                <span class="${(totalTaxableProfit * (1 - vergiOrani)) >= 0 ? 'positive-value' : 'negative-value'}">
+                    ${(totalTaxableProfit * (1 - vergiOrani)).toFixed(2)}
+                </span>
+            </strong>
         </div>
+        <div class="table-container">
     `;
 
     // Sonra tablo HTML'ini oluştur
@@ -529,7 +535,7 @@ function displayTable(data) {
         }
     }
     
-    tableHtml += '</tbody></table>';
+    tableHtml += '</tbody></table></div>';
 
     // Önce özet, sonra tablo olacak şekilde HTML'i yerleştir
     document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
@@ -544,7 +550,7 @@ function displayTable(data) {
 function createTableHeader() {
     const vergiDonemi = document.getElementById('vergiDonemi').value;
     return `<table>
-        <thead>
+        <thead class="sticky-header">
             <tr>
                 <th colspan="23" style="text-align: center; background-color: #e6e6e6;">
                     USD BAZLI YATIRIM İŞLEMLERİ ${vergiDonemi}
@@ -771,6 +777,11 @@ document.getElementById('vergiOrani').addEventListener('change', function() {
                         ${(totalTaxableProfit * vergiOrani).toFixed(2)}
                     </span>
                 </strong>
+                <strong>Vergi Sonrası Toplam Kazanç (TL): 
+                    <span class="${(totalTaxableProfit * (1 - vergiOrani)) >= 0 ? 'positive-value' : 'negative-value'}">
+                        ${(totalTaxableProfit * (1 - vergiOrani)).toFixed(2)}
+                    </span>
+                </strong>
             `;
         }
     }
@@ -872,23 +883,6 @@ function showError(message, showMail = true) {
             ${showMail ? '<p>şuraya mail atabilirsiniz: <a href="mailto:umuterturk@gmail.com">umuterturk@gmail.com</a></p>' : ''}
         </div>
     `;
-}
-
-function calculateTax(row, vergiDonemi) {
-    // ... existing code ...
-
-    // Satış yılı kontrolü
-    const satisYili = new Date(row.Tarih).getFullYear();
-    if (satisYili != vergiDonemi) {
-        return `0 (${vergiDonemi} için)`;
-    }
-
-    // Vergi hesaplama mantığı
-    const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
-    const kar = row.Kar;
-    const vergi = kar * vergiOrani;
-
-    return vergi.toFixed(2);
 }
 
 // Global FifoCalculator örneği
