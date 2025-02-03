@@ -880,7 +880,7 @@ function showError(message, showMail = true) {
     container.innerHTML = `
         <div class="error-message" style="color: #dc3545; padding: 20px; text-align: center; border: 1px solid #dc3545; border-radius: 4px; margin: 20px 0;">
             <p>😟 ${message}</p>
-            ${showMail ? '<p>şuraya mail atabilirsiniz: <a href="mailto:umuterturk@gmail.com">umuterturk@gmail.com</a></p>' : ''}
+            ${showMail ? '<p>Sorunuz varsa <a href="https://x.com/@CodeOnBrew">x.com/@CodeOnBrew</a> adresine ulaşabilirsiniz.</p>' : ''}
         </div>
     `;
 }
