@@ -8,9 +8,24 @@ const TCMB_RATES = {"2020-01-01":5.94,"2020-01-02":5.9478,"2020-01-03":5.9627,"2
 
 document.getElementById('uploadPdf').addEventListener('change', function(event) {
     const files = event.target.files;
+    const fileCounter = document.getElementById('fileCounter');
+    
     if (files.length > 0) {
+        // Hata mesajını ve önceki tabloyu temizle
+        document.getElementById('tableContainer').innerHTML = '';
+        
+        // Dosya sayacını güncelle
+        fileCounter.innerHTML = `
+            <i class="fas fa-file-pdf"></i>
+            ${files.length} adet ekstre yüklendi
+        `;
+        fileCounter.className = 'file-counter success';
+        
         let allData = [];
         let processedFiles = 0;
+
+        // FIFO hesaplayıcıyı sıfırla
+        calculator = new FifoCalculator();
 
         for (let file of files) {
             const reader = new FileReader();
@@ -26,6 +41,10 @@ document.getElementById('uploadPdf').addEventListener('change', function(event) 
             };
             reader.readAsArrayBuffer(file);
         }
+    } else {
+        // Dosya seçilmediğinde sayacı temizle
+        fileCounter.innerHTML = '';
+        fileCounter.className = 'file-counter';
     }
 });
 
@@ -292,6 +311,7 @@ class FifoCalculator {
         const availablePurchases = this.purchases.filter(p => p.symbol === symbol);
         
         if (availablePurchases.length === 0) {
+            showError(`${symbol} sembolü için uygun alış bulunamadı. Tüm dosyaları eklediğinizden emin olun.`, false);
             console.error('Satış için uygun alış bulunamadı:', symbol);
             return null;
         }
@@ -844,12 +864,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function showError(message) {
+function showError(message, showMail = true) {
     const container = document.getElementById('tableContainer');
     container.innerHTML = `
         <div class="error-message" style="color: #dc3545; padding: 20px; text-align: center; border: 1px solid #dc3545; border-radius: 4px; margin: 20px 0;">
             <p>😟 ${message}</p>
-            <p>şuraya mail atabilirsiniz: <a href="mailto:umuterturk@gmail.com">umuterturk@gmail.com</a></p>
+            ${showMail ? '<p>şuraya mail atabilirsiniz: <a href="mailto:umuterturk@gmail.com">umuterturk@gmail.com</a></p>' : ''}
         </div>
     `;
 }
@@ -871,24 +891,5 @@ function calculateTax(row, vergiDonemi) {
     return vergi.toFixed(2);
 }
 
-function createTable(data) {
-    // ... existing code ...
-
-    // Tablo satırlarını oluştur
-    data.forEach(row => {
-        const tr = document.createElement('tr');
-        
-        // ... other columns ...
-
-        // Vergi kolonu için
-        const vergiCell = document.createElement('td');
-        const vergiDonemi = document.getElementById('vergiDonemi').value;
-        const vergiDegeri = calculateTax(row, vergiDonemi);
-        vergiCell.textContent = vergiDegeri;
-        tr.appendChild(vergiCell);
-
-        // ... rest of the code ...
-    });
-
-    // ... existing code ...
-}
+// Global FifoCalculator örneği
+let calculator = new FifoCalculator();

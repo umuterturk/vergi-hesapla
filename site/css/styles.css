@@ -692,3 +692,44 @@ table td:nth-child(18) {
     margin-right: 0.5rem;
     color: #3498db;
 }
+
+/* Mevcut popup stillerinin yanına ekleyin */
+.popup-content.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.popup-content.warning p:first-child {
+    color: #856404;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.popup-content.warning .warning-details {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+
+.popup-content.warning i {
+    color: #ffc107;
+}
+
+.file-counter {
+    margin-top: 10px;
+    text-align: center;
+    color: #495057;
+    font-size: 0.9em;
+}
+
+.file-counter.success {
+    color: #28a745;
+}
+
+.file-counter.warning {
+    color: #ffc107;
+}
+
+.file-counter i {
+    margin-right: 5px;
+}
