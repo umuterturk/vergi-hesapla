@@ -36,12 +36,14 @@ Bu proje, yatırımcıların hayatını kolaylaştırmak için gönüllü olarak
 
 Bu proje tamamen ücretsiz ve reklamsız olarak sunulmaktadır. Eğer bu araç size fayda sağladıysa ve geliştirilmesine destek olmak isterseniz:
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/umuterturk)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/codeonbrew)
 
 ## 📬 İletişim
 
 - GitHub Issues (Önerilen): [Issues](https://github.com/umuterturk/vergi-hesaplayici/issues)
-- E-posta: umutert@gmail.com
+- X: [CodeOnBrew](https://x.com/@CodeOnBrew)
+- bsky: [CodeOnBrew](https://bsky.app/profile/codeonbrew.bsky.social) 
+- YouTube: [CodeOnBrew](https://www.youtube.com/@CodeOnBrew)
 
 ## 🙏 Teşekkür
 
