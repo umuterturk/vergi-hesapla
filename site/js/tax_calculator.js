@@ -96,8 +96,8 @@ class TaxCalculator {
 
         // Mevcutta satış adedi kadar alış var mı kontrol et
         const totalAvailable = availablePurchases.reduce((sum, p) => sum + (p.amount - (p.usedAmount || 0)), 0);
-        if (sellAmount > totalAvailable) {
-            throw new Error(`${symbol} için ${sellDate} tarihinde satış adedi ${sellAmount} iken yalnızca ${totalAvailable} adet mevcut, eksik ekstre yüklemiş olabilirsiniz.`);
+        if (sellAmount - totalAvailable  > 0.01) {
+            console.error(`${symbol} için ${sellDate} tarihinde satış adedi ${sellAmount} iken yalnızca ${totalAvailable} adet mevcut, eksik ekstre yüklemiş olabilirsiniz.`);
         }
 
         let purchaseIndex = 0;

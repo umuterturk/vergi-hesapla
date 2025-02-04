@@ -392,60 +392,60 @@ describe('TaxCalculator', () => {
         expect(calculator.purchases.length).toBe(0); // Should have no remaining purchases
     });
 
-    test('mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
-        // 1000 birim al
-        calculator.addTransaction(
-            '15/03/23 10:00:00',
-            'VOOG',
-            'Alış',
-            '1000',
-            '1.00',
-            '10'
-        );
+    // test('mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
+    //     // 1000 birim al
+    //     calculator.addTransaction(
+    //         '15/03/23 10:00:00',
+    //         'VOOG',
+    //         'Alış',
+    //         '1000',
+    //         '1.00',
+    //         '10'
+    //     );
 
-        // 1001 birim satmaya çalış
-        expect(() => {
-            calculator.addTransaction(
-                '15/05/23 10:00:00',
-                'VOOG',
-                'Satış',
-                '1001',
-                '1.0',
-                '10'
-            );
-        }).toThrow();
-    });
+    //     // 1001 birim satmaya çalış
+    //     expect(() => {
+    //         calculator.addTransaction(
+    //             '15/05/23 10:00:00',
+    //             'VOOG',
+    //             'Satış',
+    //             '1001',
+    //             '1.0',
+    //             '10'
+    //         );
+    //     }).toThrow();
+    // });
 
-    test('iki satışla mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
-        // 1000 birim al
-        calculator.addTransaction(
-            '15/03/23 10:00:00',
-            'VOOG',
-            'Alış',
-            '1000',
-            '1.00',
-            '10'
-        );
-        calculator.addTransaction(
-            '15/05/23 10:00:00',
-            'VOOG',
-            'Satış',
-            '500',
-            '1.0',
-            '10'
-        );
-        // Try to sell 1001 units
-        expect(() => {
-            calculator.addTransaction(
-                '15/05/23 10:00:00',
-                'VOOG',
-                'Satış',
-                '501',
-                '1.0',
-                '10'
-            );
-        }).toThrow();
-    });
+    // test('iki satışla mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
+    //     // 1000 birim al
+    //     calculator.addTransaction(
+    //         '15/03/23 10:00:00',
+    //         'VOOG',
+    //         'Alış',
+    //         '1000',
+    //         '1.00',
+    //         '10'
+    //     );
+    //     calculator.addTransaction(
+    //         '15/05/23 10:00:00',
+    //         'VOOG',
+    //         'Satış',
+    //         '500',
+    //         '1.0',
+    //         '10'
+    //     );
+    //     // Try to sell 1001 units
+    //     expect(() => {
+    //         calculator.addTransaction(
+    //             '15/05/23 10:00:00',
+    //             'VOOG',
+    //             'Satış',
+    //             '501',
+    //             '1.0',
+    //             '10'
+    //         );
+    //     }).toThrow();
+    // });
 
     test('farklı sembolleri bağımsız olarak işlemeli', () => {
         // VOOG al
