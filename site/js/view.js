@@ -1,4 +1,4 @@
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 const SHOW_BUY_ME_COFFEE = true;
 
 // Global calculator instance
@@ -145,7 +145,7 @@ function parseTableData(tableText) {
     let matches = [...tableText.matchAll(datePattern)];
     
     let structuredData = [];
-    console.log("Bulunan tarih eşleşmeleri:", matches); // Debug için
+    debug_log("Bulunan tarih eşleşmeleri:", matches); // Debug için
 
     matches.forEach((match, index) => {
         let date = match[0];
@@ -169,7 +169,7 @@ function parseTableData(tableText) {
             }
         }
 
-        console.log("İşlenmiş satır:", rowData); // Debug için
+        debug_log("İşlenmiş satır:", rowData); // Debug için
         structuredData.push(rowData);
     });
 
@@ -200,7 +200,7 @@ function parseYiufeData(yiufeText) {
 }
 
 function displayTable(data) {
-    console.log("Gelen veri:", data);
+    debug_log("Gelen veri:", data);
     
     // Verileri daha sonra kullanmak için sakla
     lastProcessedData = data;
@@ -218,7 +218,7 @@ function displayTable(data) {
     try {
         // Tüm işlemleri işleme
         for (let row of data) {
-            console.log("İşlenen satır:", row);
+            debug_log("İşlenen satır:", row);
             
             // Null check ve işlem durumu kontrolü
             if (!row || row.length < 11 || row[4] !== 'Gerçekleşti') {
@@ -241,7 +241,7 @@ function displayTable(data) {
                     fee.toString()    // komisyon
                 );
                 
-                console.log("İşlem sonucu:", result);
+                debug_log("İşlem sonucu:", result);
 
                 if (result) {
                     if (result.type === 'purchase') {
@@ -250,7 +250,7 @@ function displayTable(data) {
                             type: 'original',
                             vergiDonemi: "20" + row[0].split('/')[2].split(' ')[0]
                         });
-                        console.log("Alış işlemi eklendi:", allTransactions[allTransactions.length - 1]);
+                        debug_log("Alış işlemi eklendi:", allTransactions[allTransactions.length - 1]);
                     } else if (result.type === 'sale') {
                         const [day, month, year] = row[0].split(' ')[0].split('/');
                         const islemYili = "20" + year;
@@ -273,7 +273,7 @@ function displayTable(data) {
                                 buyValue: detail.buyValue
                             };
                             allTransactions.push(transaction);
-                            console.log("Satış işlemi eklendi:", transaction);
+                            debug_log("Satış işlemi eklendi:", transaction);
                         });
                     }
                 }
@@ -286,7 +286,7 @@ function displayTable(data) {
         return;
     }
 
-    console.log("İşlenmiş işlemler:", allTransactions);
+    debug_log("İşlenmiş işlemler:", allTransactions);
 
     if (hasError || allTransactions.length === 0) {
         showError("İşlenebilecek işlem bulunamadı veya bir hata oluştu.");

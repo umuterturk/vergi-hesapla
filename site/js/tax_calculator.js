@@ -12,11 +12,9 @@ class TaxCalculator {
         const dateStr = fullDateStr.split(' ')[0];
         // Tarih dizesini gün, ay ve yıl olarak ayır
         const [day, month, year] = dateStr.split('/');
-        const date = new Date(20 + year, month-1, day);
-        console.log(date.toISOString());
+        const date = new Date(20 + year, month-1, day); // javascript date GG
         
         const prevDateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD formatı
-        console.log(prevDateStr);
         if (this.tcmbRates[prevDateStr]) {
             return this.tcmbRates[prevDateStr];
         }
@@ -88,11 +86,18 @@ class TaxCalculator {
         let profitDetails = [];
         let totalProfit = 0;
         let totalAdjustedProfit = 0;
+        let totalTaxableAmount = 0;
         
         const availablePurchases = this.purchases.filter(p => p.symbol === symbol);
         
         if (availablePurchases.length === 0) {
-            throw new Error(`Sembol için eşleşen alış bulunamadı: ${symbol}`); // Hata mesajı
+            throw new Error(`${symbol} için ${sellDate} eşleşen alış bulunamadı, eksik ekstre yüklemiş olabilirsiniz.`);
+        }
+
+        // Mevcutta satış adedi kadar alış var mı kontrol et
+        const totalAvailable = availablePurchases.reduce((sum, p) => sum + (p.amount - (p.usedAmount || 0)), 0);
+        if (sellAmount > totalAvailable) {
+            throw new Error(`${symbol} için ${sellDate} tarihinde satış adedi ${sellAmount} iken yalnızca ${totalAvailable} adet mevcut, eksik ekstre yüklemiş olabilirsiniz.`);
         }
 
         let purchaseIndex = 0;
@@ -126,7 +131,7 @@ class TaxCalculator {
             const [day, month, year] = sellDate.split(' ')[0].split('/');
             const saleYear = "20" + year;
             const taxableAmount = saleYear === this.vergiDonemi && adjustedProfit > 0 ? adjustedProfit : 0;
-
+            totalTaxableAmount += taxableAmount;
             profitDetails.push({
                 buyDate: purchase.date,
                 sellDate: sellDate,
@@ -169,8 +174,8 @@ class TaxCalculator {
             summary: {
                 rawProfit: totalProfit,
                 adjustedProfit: totalAdjustedProfit,
-                taxableAmount: Math.max(0, totalAdjustedProfit),
-                tax: Math.max(0, totalAdjustedProfit) * this.vergiOrani
+                taxableAmount: totalTaxableAmount,
+                tax: totalTaxableAmount * this.vergiOrani
             }
         };
     }
