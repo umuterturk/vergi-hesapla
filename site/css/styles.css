@@ -759,3 +759,51 @@ table td:nth-child(18) {
 .sticky-header tr:last-child th {
     border-top: none;
 }
+
+.warnings-container {
+    margin-bottom: 20px;
+}
+
+.warning-alert {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.warning-alert i.fa-exclamation-triangle {
+    color: #856404;
+}
+
+.dismiss-warning {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #856404;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.dismiss-warning:hover {
+    color: #533f03;
+}
+
+.dismiss-all-warnings {
+    background-color: #856404;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.dismiss-all-warnings:hover {
+    background-color: #533f03;
+}

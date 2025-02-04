@@ -24,13 +24,16 @@ const SAMPLE_TCMB_RATES = {
 
 describe('TaxCalculator', () => {
     let calculator;
+    let warnings = [];
 
     beforeEach(() => {
+        warnings = [];
         calculator = new TaxCalculator(
             SAMPLE_YIUFE_DATA,
             SAMPLE_TCMB_RATES,
             '2023',
-            0.20
+            0.20,
+            (warning) => warnings.push(warning)
         );
     });
 
@@ -40,28 +43,33 @@ describe('TaxCalculator', () => {
         expect(calculator.vergiDonemi).toBe('2023');
         expect(calculator.vergiOrani).toBe(0.20);
         expect(calculator.purchases).toEqual([]);
+        expect(warnings).toEqual([]);
     });
 
     test('önceki döviz kurunu doğru almalı', () => {
         const rate = calculator.getPreviousExchangeRate('15/03/23 10:10:00');
         expect(rate).toBe(20.00); 
+        expect(warnings).toEqual([]);
     });
 
     test('geçersiz döviz kuru tarihi için hata fırlatmalı', () => {
         expect(() => {
             calculator.getPreviousExchangeRate('16/12/22 10:10:00');
         }).toThrow();
+        expect(warnings).toEqual([]);
     });
 
     test('önceki Yİ-UFE değerini doğru almalı', () => {
         const yiufe = calculator.getPreviousYiufe('15/03/23');
         expect(yiufe).toBe(300.00); // Should get February value
+        expect(warnings).toEqual([]);
     });
 
     test('geçersiz Yİ-UFE dönemi için hata fırlatmalı', () => {
         expect(() => {
             calculator.getPreviousYiufe('16/12/22');
         }).toThrow();
+        expect(warnings).toEqual([]);
     });
 
     test('alış işlemini doğru işlemeli', () => {
@@ -78,6 +86,7 @@ describe('TaxCalculator', () => {
         expect(result.data.amount).toBe(1.5);
         expect(result.data.originalPrice).toBe(220.22);
         expect(calculator.purchases.length).toBe(1);
+        expect(warnings).toEqual([]);
     });
 
     test('kârlı bir alış-satış döngüsünü doğru işlemeli', () => {
@@ -111,6 +120,7 @@ describe('TaxCalculator', () => {
         expect(result.details[0].buyExchangeRate).toBe(20.00); 
         expect(result.details[0].sellExchangeRate).toBe(140.00); 
         expect(result.summary.taxableAmount).toBe(41160);
+        expect(warnings).toEqual([]);
     });
 
     test('kârsız bir alış-satış döngüsünü doğru işlemeli', () => {
@@ -144,6 +154,7 @@ describe('TaxCalculator', () => {
         expect(result.details[0].buyExchangeRate).toBe(20.00); 
         expect(result.details[0].sellExchangeRate).toBe(30.00); 
         expect(result.summary.taxableAmount).toBe(0);
+        expect(warnings).toEqual([]);
     });
     
     test('birden fazla alış ve satışı doğru işlemeli', () => {
@@ -209,6 +220,7 @@ describe('TaxCalculator', () => {
         expect(result2.details[0].buyExchangeRate).toBe(20.00);
         expect(result2.details[0].sellExchangeRate).toBe(140.00);
         expect(result2.summary.taxableAmount).toBe(41160);
+        expect(warnings).toEqual([]);
     });
 
     test('kârsız işlemler aynı sembol olsa bile vergilendirilebilir tutarı değiştirmemeli', () => {
@@ -266,6 +278,7 @@ describe('TaxCalculator', () => {
         expect(result.details[0].sellExchangeRate).toBe(140.00); 
         expect(result.details[0].taxableAmount).toBe(41160); 
         expect(result.summary.taxableAmount).toBe(41160);
+        expect(warnings).toEqual([]);
     });
 
     test('satış miktarı iki alıştan hesaplanması gerekiyorsa iki detay oluşturmalı', () => {
@@ -317,6 +330,7 @@ describe('TaxCalculator', () => {
         expect(result.details[1].sellExchangeRate).toBe(140.00); 
 
         expect(result.summary.taxableAmount).toBe(41746.25);
+        expect(warnings).toEqual([]);
     });
 
     test('farklı vergi döneminde satış yapılırsa vergi olmamalı', () => {
@@ -347,6 +361,7 @@ describe('TaxCalculator', () => {
         );        
 
         expect(result1.summary.taxableAmount).toBe(0);
+        expect(warnings).toEqual([]);
     });
 
     test('hesaplayıcı durumunu sıfırlamalı', () => {
@@ -390,62 +405,81 @@ describe('TaxCalculator', () => {
 
         expect(result.type).toBe('sale');
         expect(calculator.purchases.length).toBe(0); // Should have no remaining purchases
+        expect(warnings).toEqual([]);
     });
 
-    // test('mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
-    //     // 1000 birim al
-    //     calculator.addTransaction(
-    //         '15/03/23 10:00:00',
-    //         'VOOG',
-    //         'Alış',
-    //         '1000',
-    //         '1.00',
-    //         '10'
-    //     );
+    test('mevcut miktardan fazla satış yapmaya çalışınca uyarı vermelidir', () => {
+        const warnings = [];
+        calculator = new TaxCalculator(
+            SAMPLE_YIUFE_DATA,
+            SAMPLE_TCMB_RATES,
+            '2023',
+            0.20,
+            (warning) => warnings.push(warning)
+        );
 
-    //     // 1001 birim satmaya çalış
-    //     expect(() => {
-    //         calculator.addTransaction(
-    //             '15/05/23 10:00:00',
-    //             'VOOG',
-    //             'Satış',
-    //             '1001',
-    //             '1.0',
-    //             '10'
-    //         );
-    //     }).toThrow();
-    // });
+        // 1000 birim al
+        calculator.addTransaction(
+            '15/03/23 10:00:00',
+            'VOOG',
+            'Alış',
+            '1000',
+            '1.00',
+            '10'
+        );
 
-    // test('iki satışla mevcut miktardan fazla satış yapmaya çalışınca hata fırlatmalı', () => {
-    //     // 1000 birim al
-    //     calculator.addTransaction(
-    //         '15/03/23 10:00:00',
-    //         'VOOG',
-    //         'Alış',
-    //         '1000',
-    //         '1.00',
-    //         '10'
-    //     );
-    //     calculator.addTransaction(
-    //         '15/05/23 10:00:00',
-    //         'VOOG',
-    //         'Satış',
-    //         '500',
-    //         '1.0',
-    //         '10'
-    //     );
-    //     // Try to sell 1001 units
-    //     expect(() => {
-    //         calculator.addTransaction(
-    //             '15/05/23 10:00:00',
-    //             'VOOG',
-    //             'Satış',
-    //             '501',
-    //             '1.0',
-    //             '10'
-    //         );
-    //     }).toThrow();
-    // });
+        // 1001 birim satmaya çalış
+        calculator.addTransaction(
+            '15/05/23 10:00:00',
+            'VOOG',
+            'Satış',
+            '1001',
+            '1.0',
+            '10'
+        );
+
+        expect(warnings).toHaveLength(1);
+    });
+
+    test('iki satışla mevcut miktardan fazla satış yapmaya çalışınca uyarı vermelidir', () => {
+
+        const warnings = [];
+        calculator = new TaxCalculator(
+            SAMPLE_YIUFE_DATA,
+            SAMPLE_TCMB_RATES,
+            '2023',
+            0.20,
+            (warning) => warnings.push(warning)
+        );
+        // 1000 birim al
+        calculator.addTransaction(
+            '15/03/23 10:00:00',
+            'VOOG',
+            'Alış',
+            '1000',
+            '1.00',
+            '10'
+        );
+        calculator.addTransaction(
+            '15/05/23 10:00:00',
+            'VOOG',
+            'Satış',
+            '500',
+            '1.0',
+            '10'
+        );
+        // Try to sell 1001 units
+        calculator.addTransaction(
+            '15/05/23 10:00:00',
+            'VOOG',
+            'Satış',
+            '501',
+            '1.0',
+            '10'
+        );
+
+        expect(warnings).toHaveLength(1);
+    });
 
     test('farklı sembolleri bağımsız olarak işlemeli', () => {
         // VOOG al
@@ -491,5 +525,6 @@ describe('TaxCalculator', () => {
         expect(result1.details[0].symbol).toBe('VOOG');
         expect(result2.details[0].symbol).toBe('AAPL');
         expect(calculator.purchases.length).toBe(2); // Should have remaining of both symbols
+        expect(warnings).toEqual([]);
     });
 }); 

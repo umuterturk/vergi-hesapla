@@ -1,10 +1,11 @@
 class TaxCalculator {
-    constructor(yiufeData, tcmbRates, vergiDonemi, vergiOrani) {
+    constructor(yiufeData, tcmbRates, vergiDonemi, vergiOrani, warningCallback = null) {
         this.yiufeData = yiufeData;
         this.tcmbRates = tcmbRates;
         this.vergiDonemi = vergiDonemi;
         this.vergiOrani = vergiOrani;
         this.purchases = [];
+        this.warningCallback = warningCallback;
     }
 
     
@@ -96,8 +97,11 @@ class TaxCalculator {
 
         // Mevcutta satış adedi kadar alış var mı kontrol et
         const totalAvailable = availablePurchases.reduce((sum, p) => sum + (p.amount - (p.usedAmount || 0)), 0);
-        if (sellAmount - totalAvailable  > 0.01) {
-            console.error(`${symbol} için ${sellDate} tarihinde satış adedi ${sellAmount} iken yalnızca ${totalAvailable} adet mevcut, eksik ekstre yüklemiş olabilirsiniz.`);
+        if (sellAmount - totalAvailable > 0.0001) {
+            const warning = `${symbol} için ${sellDate} tarihinde satış adedi ${sellAmount} iken yalnızca ${totalAvailable} adet mevcut, eksik ekstre yüklemiş olabilirsiniz.`;
+            if (this.warningCallback) {
+                this.warningCallback(warning);
+            }
         }
 
         let purchaseIndex = 0;

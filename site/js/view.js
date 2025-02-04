@@ -4,6 +4,8 @@ const SHOW_BUY_ME_COFFEE = true;
 // Global calculator instance
 let calculator = null;
 
+let activeWarnings = new Set(); // To store unique warnings
+
 document.getElementById('uploadPdf').addEventListener('change', function(event) {
     const files = event.target.files;
     const fileCounter = document.getElementById('fileCounter');
@@ -25,7 +27,13 @@ document.getElementById('uploadPdf').addEventListener('change', function(event) 
         // Mevcut ayarlarla hesaplayıcıyı sıfırla
         const vergiDonemi = document.getElementById('vergiDonemi').value;
         const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
-        calculator = new TaxCalculator(YIUFE_DATA, TCMB_RATES, vergiDonemi, vergiOrani);
+        calculator = new TaxCalculator(
+            YIUFE_DATA, 
+            TCMB_RATES, 
+            vergiDonemi, 
+            vergiOrani,
+            showWarning // Pass the UI warning function
+        );
 
         for (let file of files) {
             const reader = new FileReader();
@@ -200,6 +208,9 @@ function parseYiufeData(yiufeText) {
 }
 
 function displayTable(data) {
+    // Clear warnings when starting new calculation
+    activeWarnings.clear();
+    
     debug_log("Gelen veri:", data);
     
     // Verileri daha sonra kullanmak için sakla
@@ -209,7 +220,13 @@ function displayTable(data) {
     const vergiOrani = parseFloat(document.getElementById('vergiOrani').value) / 100;
     
     // Mevcut ayarlarla hesaplayıcıyı sıfırla
-    calculator = new TaxCalculator(YIUFE_DATA, TCMB_RATES, vergiDonemi, vergiOrani);
+    calculator = new TaxCalculator(
+        YIUFE_DATA, 
+        TCMB_RATES, 
+        vergiDonemi, 
+        vergiOrani,
+        showWarning // Pass the UI warning function
+    );
     
     let allTransactions = [];
     let totalTaxableProfit = 0;
@@ -221,7 +238,7 @@ function displayTable(data) {
             debug_log("İşlenen satır:", row);
             
             // Null check ve işlem durumu kontrolü
-            if (!row || row.length < 11 || row[4] !== 'Gerçekleşti') {
+            if (!row || row.length < 11) {
                 console.warn("Geçersiz veya gerçekleşmemiş işlem:", row);
                 continue;
             }
@@ -332,6 +349,8 @@ function displayTable(data) {
     downloadButtons.forEach(button => {
         button.style.display = allTransactions.length > 0 ? 'inline-block' : 'none';
     });
+
+    updateWarningsDisplay();
 }
 
 function createTableHeader() {
@@ -631,4 +650,63 @@ function showError(message, showMail = true) {
             ${showMail ? '<p>Sorunuz varsa <a href="https://x.com/@CodeOnBrew">x.com/@CodeOnBrew</a> adresine ulaşabilirsiniz.</p>' : ''}
         </div>
     `;
+}
+
+function showWarning(message) {
+    activeWarnings.add(message);
+    updateWarningsDisplay();
+}
+
+function updateWarningsDisplay() {
+    const existingWarnings = document.getElementById('warningsContainer');
+    if (existingWarnings) {
+        existingWarnings.remove();
+    }
+    
+    if (activeWarnings.size === 0) return;
+
+    const warningsHtml = `
+        <div id="warningsContainer" class="warnings-container">
+            ${Array.from(activeWarnings).map(warning => `
+                <div class="warning-alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>${warning}</span>
+                    <button onclick="dismissWarning('${warning.replace(/'/g, "\\'")}')" class="dismiss-warning">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('')}
+            ${activeWarnings.size > 1 ? `
+                <button onclick="dismissAllWarnings()" class="dismiss-all-warnings">
+                    Tüm Uyarıları Kapat
+                </button>
+            ` : ''}
+        </div>
+    `;
+
+    const tableContainer = document.getElementById('tableContainer');
+    tableContainer.insertAdjacentHTML('afterbegin', warningsHtml);
+}
+
+function dismissWarning(warning) {
+    activeWarnings.delete(warning);
+    updateWarningsDisplay();
+}
+
+function dismissAllWarnings() {
+    activeWarnings.clear();
+    updateWarningsDisplay();
+}
+
+// Make functions available globally
+window.dismissWarning = dismissWarning;
+window.dismissAllWarnings = dismissAllWarnings;
+
+// Add this to your file processing function to clear warnings
+function processFiles(files) {
+    // Clear any existing warnings when starting new calculation
+    const warningPopup = document.getElementById('warningPopup');
+    warningPopup.style.display = 'none';
+    
+    // ... rest of your file processing code ...
 }
