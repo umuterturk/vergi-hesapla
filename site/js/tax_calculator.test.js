@@ -1,31 +1,5 @@
 const TaxCalculator = require('./tax_calculator.js');
-
-// Örnek test verisi - Aylık Yİ-UFE verileri
-const SAMPLE_YIUFE_DATA = {
-    '202212': 100.00,
-    '202301': 200.00,
-    '202302': 300.00,
-    '202303': 400.00,
-    '202304': 500.00,
-    '202305': 600.00,
-    '202306': 700.00,
-    '202402': 800.00,
-    '202406': 900.00,
-};
-
-// Örnek test verisi - Günlük TCMB kurları
-const SAMPLE_TCMB_RATES = {
-    '2023-01-14': 10.00,
-    '2023-02-14': 15.00,
-    '2023-03-14': 20.00,
-    '2023-04-14': 25.00,
-    '2023-05-14': 30.00,
-    '2023-06-14': 35.00,
-    '2023-07-14': 140.00,
-    '2024-03-14': 145.00,
-    '2024-07-14': 150.00,
-
-};
+const { SAMPLE_YIUFE_DATA, SAMPLE_TCMB_RATES } = require('./test_data.js');
 
 describe('TaxCalculator', () => {
     let calculator;
