@@ -290,7 +290,6 @@ describe('TaxCalculator', () => {
         expect(result.details[0].taxableAmount).toBe(result.details[0].adjustedProfit);
         expect(result.summary.taxableAmount).toBe(41160);
         expect(result.summary.taxableAmount).toBe(result.summary.adjustedProfit);
-        console.log('result', result);
         expect(warnings).toEqual([]);
     });
 
@@ -646,7 +645,8 @@ describe('TaxCalculator', () => {
             ['15/07/24 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '2.50', '20']
         ];
         const result = calculator.calculateTotalTaxableProfit(differentInflationData);
-        expect(result.totalTaxableProfit).toBeDefined();
+        const voogSell = result.allTransactions.find(t => t['2'] === 'VOOG' && t[3] === 'Satış');
+        expect(result.totalTaxableProfit).toBe(voogSell.adjustedProfit); // AAPL satış işlemi 2024 yılında yapıldığı için profite katılmamalı
     });
 
     test('calculateTotalTaxableProfit negatif miktar veya fiyatları doğru işlemeli', () => {
@@ -658,12 +658,18 @@ describe('TaxCalculator', () => {
     });
 
     test('calculateTotalTaxableProfit büyük veri setini doğru işlemeli', () => {
-        const largeData = Array.from({ length: 1000 }, (_, i) => [
-            `15/03/23 10:00:00`, '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10',
-            `15/07/23 10:00:00`, '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'
-        ]).flat();
+        const largeBuyData = [];
+        for (let i = 0; i < 1000; i++) {
+            largeBuyData.push(['15/03/23 10:00:00', '', 'VOOG', 'Alış' , '', '', '', '', '100', '1.00', '10'])
+        }
+        const largeSellData = [];
+        for (let i = 0; i < 1000; i++) {
+            largeSellData.push(['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'])
+        }
+        const largeData = [...largeBuyData, ...largeSellData];
+
         const result = calculator.calculateTotalTaxableProfit(largeData);
-        expect(result.totalTaxableProfit).toBeDefined();
+        expect(result.totalTaxableProfit).toBeCloseTo(8166666.666, 2);
     });
 
     test('calculateTotalTaxableProfit kar durumunda Yİ-ÜFE artışı %10 veya daha fazla olduğunda enflasyon düzeltmesi yapmalı', () => {
@@ -697,8 +703,6 @@ describe('TaxCalculator', () => {
         const temmuzSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/07/23'));
         const ekimSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/10/23'));
 
-        console.log(temmuzSatisi)
-        console.log(ekimSatisi)
         // 100 * 1.00 * 2000 - 100 * 1.00 * 1000
         const expectedTemmuzAdjustedProfit = 100000 
         // 100 * 1.00 * 2000 - 100 * 1.00 * 1000 * (110 / 100)
