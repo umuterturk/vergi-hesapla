@@ -8,7 +8,9 @@ const SAMPLE_YIUFE_DATA = {
     '202303': 400.00,
     '202304': 500.00,
     '202305': 600.00,
-    '202306': 700.00
+    '202306': 700.00,
+    '202402': 800.00,
+    '202406': 900.00,
 };
 
 // Örnek test verisi - Günlük TCMB kurları
@@ -19,7 +21,10 @@ const SAMPLE_TCMB_RATES = {
     '2023-04-14': 25.00,
     '2023-05-14': 30.00,
     '2023-06-14': 35.00,
-    '2023-07-14': 140.00
+    '2023-07-14': 140.00,
+    '2024-03-14': 145.00,
+    '2024-07-14': 150.00,
+
 };
 
 describe('TaxCalculator', () => {
@@ -123,7 +128,7 @@ describe('TaxCalculator', () => {
         expect(warnings).toEqual([]);
     });
 
-    test('kârsız bir alış-satış döngüsünü doğru işlemeli', () => {
+    test('kârsız bir alış-satış için zararı doğru işlemeli', () => {
         // Mart ayında ilk alış
         calculator.addTransaction(
             '15/03/23 10:00:00',
@@ -153,7 +158,10 @@ describe('TaxCalculator', () => {
         expect(result.details[0].sellYiufe).toBe(500.00); 
         expect(result.details[0].buyExchangeRate).toBe(20.00); 
         expect(result.details[0].sellExchangeRate).toBe(30.00); 
-        expect(result.summary.taxableAmount).toBe(0);
+        expect(result.details[0].taxableAmount).toBe(result.details[0].adjustedProfit);
+        expect(result.summary.taxableAmount).toBe(result.summary.adjustedProfit);
+        expect(result.summary.taxableAmount).toBe(result.summary.adjustedProfit);
+        expect(result.summary.adjustedProfit).toBe(-1470);
         expect(warnings).toEqual([]);
     });
     
@@ -209,7 +217,8 @@ describe('TaxCalculator', () => {
         expect(result1.details[0].sellYiufe).toBe(500.00);
         expect(result1.details[0].buyExchangeRate).toBe(20.00);
         expect(result1.details[0].sellExchangeRate).toBe(30.00);
-        expect(result1.summary.taxableAmount).toBe(0);
+        expect(result1.details[0].taxableAmount).toBe(result1.details[0].adjustedProfit);
+        expect(result1.summary.taxableAmount).toBe(result1.summary.adjustedProfit);
 
         // İkinci satış sonuçlarını kontrol et
         expect(result2.type).toBe('sale');
@@ -219,11 +228,12 @@ describe('TaxCalculator', () => {
         expect(result2.details[0].sellYiufe).toBe(700.00);
         expect(result2.details[0].buyExchangeRate).toBe(20.00);
         expect(result2.details[0].sellExchangeRate).toBe(140.00);
-        expect(result2.summary.taxableAmount).toBe(41160);
+        expect(result2.details[0].taxableAmount).toBe(result2.details[0].adjustedProfit);
+        expect(result2.summary.taxableAmount).toBe(result2.summary.adjustedProfit);
         expect(warnings).toEqual([]);
     });
 
-    test('kârsız işlemler aynı sembol olsa bile vergilendirilebilir tutarı değiştirmemeli', () => {
+    test('zararı olan işlemler vergilendirilebilir tutarı azaltmalı', () => {
         // Mart'ta ilk alış
         calculator.addTransaction(
             '15/03/23 10:00:00',
@@ -234,13 +244,13 @@ describe('TaxCalculator', () => {
             '10'
         );
 
-        // Sonra Mart'ta satış
+        // Sonra Mart'ta satış (zarar)
         let result = calculator.addTransaction(
-            '15/03/23 10:00:00',
+            '15/03/23 10:01:00',
             'VOOG',
             'Satış',
             '500.00',
-            '1.0',
+            '0.2', // Zarar için daha düşük fiyat
             '10'
         );
 
@@ -248,22 +258,22 @@ describe('TaxCalculator', () => {
         expect(result.details.length).toBe(1);
         expect(result.details[0].amount).toBe(500.00);
         expect(result.details[0].buyPrice).toBe(1.00);
-        expect(result.details[0].sellPrice).toBe(1.00);
+        expect(result.details[0].sellPrice).toBe(0.20);
         expect(result.details[0].buyYiufe).toBe(300.00); 
         expect(result.details[0].sellYiufe).toBe(300.00); 
         expect(result.details[0].buyExchangeRate).toBe(20.00); 
         expect(result.details[0].sellExchangeRate).toBe(20.00); 
-        expect(result.details[0].taxableAmount).toBe(0); 
-        expect(result.summary.taxableAmount).toBe(0);
+        expect(result.details[0].adjustedProfit).toBe(-8000);
+        expect(result.details[0].taxableAmount).toBe(-8000); 
+        expect(result.summary.taxableAmount).toBe(-8000);
 
-
-        // Sonra Temmuz'da satış
+        // Sonra Temmuz'da satış (kar)
         result = calculator.addTransaction(
             '15/07/23 10:00:00',
             'VOOG',
             'Satış',
             '441.00',
-            '1.0',
+            '1.0', // Kar için daha yüksek fiyat
             '10'
         );
 
@@ -271,13 +281,16 @@ describe('TaxCalculator', () => {
         expect(result.details.length).toBe(1);
         expect(result.details[0].amount).toBe(441.00);
         expect(result.details[0].buyPrice).toBe(1.00);
-        expect(result.details[0].sellPrice).toBe(1.00);
+        expect(result.details[0].sellPrice).toBe(1.0);
         expect(result.details[0].buyYiufe).toBe(300.00); 
         expect(result.details[0].sellYiufe).toBe(700.00); 
         expect(result.details[0].buyExchangeRate).toBe(20.00); 
         expect(result.details[0].sellExchangeRate).toBe(140.00); 
-        expect(result.details[0].taxableAmount).toBe(41160); 
+        expect(result.details[0].adjustedProfit).toBeGreaterThan(0); // Should be positive
+        expect(result.details[0].taxableAmount).toBe(result.details[0].adjustedProfit);
         expect(result.summary.taxableAmount).toBe(41160);
+        expect(result.summary.taxableAmount).toBe(result.summary.adjustedProfit);
+        console.log('result', result);
         expect(warnings).toEqual([]);
     });
 
@@ -527,4 +540,218 @@ describe('TaxCalculator', () => {
         expect(calculator.purchases.length).toBe(2); // Should have remaining of both symbols
         expect(warnings).toEqual([]);
     });
+
+    test('calculateTotalTaxableProfit geçersiz verileri doğru işlemeli', () => {
+        const invalidData = [
+            ['15/03/23 10:00:00', '', 'VOOG'],
+            [],
+            null,
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10']
+        ];
+
+        const result = calculator.calculateTotalTaxableProfit(invalidData);
+        
+        expect(result).toBeDefined();
+        expect(result.allTransactions).toBeInstanceOf(Array);
+        expect(result.allTransactions.length).toBe(1);
+        expect(result.totalTaxableProfit).toBe(0);
+    });
+
+    test('calculateTotalTaxableProfit farklı vergi yıllarını doğru işlemeli', () => {
+        const calculator2024 = new TaxCalculator(
+            SAMPLE_YIUFE_DATA,
+            SAMPLE_TCMB_RATES,
+            '2024',
+            0.20
+        );
+
+        const multiYearData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.00', '10'],
+            ['15/03/24 10:00:00', '', 'AAPL', 'Alış', '', '', '', '', '200', '1.00', '10'],
+            ['15/07/24 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '1.00', '10']
+        ];
+
+        const result2023 = calculator.calculateTotalTaxableProfit(multiYearData);
+        const result2024 = calculator2024.calculateTotalTaxableProfit(multiYearData);
+        
+        expect(result2023.allTransactions.filter(t => t.vergiDonemi === '2023').length).toBeGreaterThan(0);
+        expect(result2024.allTransactions.filter(t => t.vergiDonemi === '2024').length).toBeGreaterThan(0);
+        expect(result2023.totalTaxableProfit).not.toBe(result2024.totalTaxableProfit);
+    });
+
+    test('calculateTotalTaxableProfit kayıpları ve kazançları birlikte doğru işlemeli', () => {
+        const testData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'], // Kazanç
+            ['15/03/23 10:00:00', '', 'AAPL', 'Alış', '', '', '', '', '100', '2.00', '10'],
+            ['15/07/23 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '1.50', '10']  // Kayıp
+        ];
+
+        const result = calculator.calculateTotalTaxableProfit(testData);
+        
+        expect(result).toBeDefined();
+        expect(result.allTransactions).toBeDefined();
+        expect(result.totalTaxableProfit).toBeDefined();
+        
+        // Enflasyon ve döviz kurları dikkate alınarak kazanç ve kayıp hesaplamalarını düzelt
+        const gainTransaction = (50 * 1.50 * 140) - (50 * 1.00 * 20 * (700 / 300)); // Enflasyon ve döviz kurları dikkate alınarak ayarlandı
+        const lossTransaction = (100 * 1.50 * 140) - (100 * 2.00 * 20 * (700 / 300)); // Enflasyon ve döviz kurları dikkate alınarak ayarlandı
+        const expectedTotalTaxableProfit = gainTransaction + lossTransaction;
+
+        // Toplam vergilendirilebilir karın yeniden hesaplanan beklenen değere eşit olduğunu doğrula
+        expect(result.totalTaxableProfit).toBeCloseTo(expectedTotalTaxableProfit, 2);
+    });
+
+    test('calculateTotalTaxableProfit boş veri setini doğru işlemeli', () => {
+        const emptyData = [];
+        const result = calculator.calculateTotalTaxableProfit(emptyData);
+        expect(result.totalTaxableProfit).toBe(0);
+        expect(result.allTransactions.length).toBe(0);
+    });
+
+    test('calculateTotalTaxableProfit sadece alış işlemlerini doğru işlemeli', () => {
+        const purchaseOnlyData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10'],
+            ['15/04/23 10:00:00', '', 'AAPL', 'Alış', '', '', '', '', '200', '2.00', '20']
+        ];
+        const result = calculator.calculateTotalTaxableProfit(purchaseOnlyData);
+        expect(result.totalTaxableProfit).toBe(0);
+    });
+
+    test('calculateTotalTaxableProfit alış yapılmadan satış yapmaya çalışınca hata vermelidir', () => {
+        const saleOnlyData = [
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'],
+            ['15/08/23 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '1.50', '10']
+        ];
+        expect(() => calculator.calculateTotalTaxableProfit(saleOnlyData)).toThrow();
+    });
+
+    test('calculateTotalTaxableProfit farklı döviz kurları ile doğru işlemeli', () => {
+        const differentRatesData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'],
+            ['15/03/24 10:00:00', '', 'AAPL', 'Alış', '', '', '', '', '200', '2.00', '20'],
+            ['15/07/24 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '2.50', '20']
+        ];
+        const result = calculator.calculateTotalTaxableProfit(differentRatesData);
+        expect(result.totalTaxableProfit).toBeDefined();
+    });
+
+    test('calculateTotalTaxableProfit farklı enflasyon oranları ile doğru işlemeli', () => {
+        const differentInflationData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'],
+            ['15/03/24 10:00:00', '', 'AAPL', 'Alış', '', '', '', '', '200', '2.00', '20'],
+            ['15/07/24 10:00:00', '', 'AAPL', 'Satış', '', '', '', '', '100', '2.50', '20']
+        ];
+        const result = calculator.calculateTotalTaxableProfit(differentInflationData);
+        expect(result.totalTaxableProfit).toBeDefined();
+    });
+
+    test('calculateTotalTaxableProfit negatif miktar veya fiyatları doğru işlemeli', () => {
+        const negativeData = [
+            ['15/03/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '-100', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '50', '-1.50', '10']
+        ];
+        expect(() => calculator.calculateTotalTaxableProfit(negativeData)).toThrow(`Negatif miktar veya fiyat geçersizdir: ${negativeData[0]}`);
+    });
+
+    test('calculateTotalTaxableProfit büyük veri setini doğru işlemeli', () => {
+        const largeData = Array.from({ length: 1000 }, (_, i) => [
+            `15/03/23 10:00:00`, '', 'VOOG', 'Alış', '', '', '', '', '100', '1.00', '10',
+            `15/07/23 10:00:00`, '', 'VOOG', 'Satış', '', '', '', '', '50', '1.50', '10'
+        ]).flat();
+        const result = calculator.calculateTotalTaxableProfit(largeData);
+        expect(result.totalTaxableProfit).toBeDefined();
+    });
+
+    test('calculateTotalTaxableProfit kar durumunda Yİ-ÜFE artışı %10 veya daha fazla olduğunda enflasyon düzeltmesi yapmalı', () => {
+        // Test için özel Yİ-ÜFE verileri oluştur
+        const testYiufeData = {
+            '202301': 100.00,  // Ocak değeri
+            '202306': 109.00,  // %9 artış - düzeltme yapılmamalı
+            '202309': 110.00   // %10 artış - düzeltme yapılmalı
+        };
+        const testTcmbRates = {
+            '2023-02-14': 100,
+            '2023-07-14': 200,
+            '2023-10-14': 200
+        };
+
+        const calculator = new TaxCalculator(
+            testYiufeData,
+            testTcmbRates
+        );
+
+        // Test verisi: Ocak'ta alış, Temmuz ve Ağustos'ta satış
+        const testData = [
+            ['15/02/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '2000', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '1000', '1.00', '10'], // yiufe %9 artış
+            ['15/10/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '1000', '1.00', '10']  // yiufe %10 artış
+        ];
+
+        const result = calculator.calculateTotalTaxableProfit(testData);
+        
+        // İşlemleri bul
+        const temmuzSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/07/23'));
+        const ekimSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/10/23'));
+
+        console.log(temmuzSatisi)
+        console.log(ekimSatisi)
+        // 100 * 1.00 * 2000 - 100 * 1.00 * 1000
+        const expectedTemmuzAdjustedProfit = 100000 
+        // 100 * 1.00 * 2000 - 100 * 1.00 * 1000 * (110 / 100)
+        const expectedEkimAdjustedProfit = 90000 
+        // Temmuz satışında (<%10 artış) enflasyon düzeltmesi yapılmamalı
+        expect(temmuzSatisi.adjustedProfit).toBeCloseTo(expectedTemmuzAdjustedProfit, 2);
+
+        // Ekim satışında (>=%10 artış) enflasyon düzeltmesi yapılmalı
+        expect(ekimSatisi.adjustedProfit).toBeCloseTo(expectedEkimAdjustedProfit, 2);
+    });
+
+
+    test('calculateTotalTaxableProfit zarar durumunda Yİ-ÜFE artışı %10 veya daha fazla olduğunda enflasyon düzeltmesi yapmalı', () => {
+        // Test için özel Yİ-ÜFE verileri oluştur
+        const testYiufeData = {
+            '202301': 100.00,  // Ocak değeri
+            '202306': 109.00,  // %9 artış - düzeltme yapılmamalı
+            '202309': 110.00   // %10 artış - düzeltme yapılmalı
+        };
+        const testTcmbRates = {
+            '2023-02-14': 200,
+            '2023-07-14': 100,
+            '2023-10-14': 100
+        };
+
+        const calculator = new TaxCalculator(
+            testYiufeData,
+            testTcmbRates
+        );
+
+        // Test verisi: Ocak'ta alış, Temmuz ve Ağustos'ta satış
+        const testData = [
+            ['15/02/23 10:00:00', '', 'VOOG', 'Alış', '', '', '', '', '2000', '1.00', '10'],
+            ['15/07/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '1000', '1.00', '10'], // yiufe %9 artış
+            ['15/10/23 10:00:00', '', 'VOOG', 'Satış', '', '', '', '', '1000', '1.00', '10']  // yiufe %10 artış
+        ];
+
+        const result = calculator.calculateTotalTaxableProfit(testData);
+        
+        // İşlemleri bul
+        const temmuzSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/07/23'));
+        const ekimSatisi = result.allTransactions.find(t => t.type === 'split' && t[0].includes('15/10/23'));
+
+        // 100 * 1.00 * 1000 - 100 * 1.00 * 2000
+        const expectedTemmuzAdjustedProfit = -100000 
+        // 100 * 1.00 * 1000 - 100 * 1.00 * 2000 * (110 / 100)
+        const expectedEkimAdjustedProfit = -120000
+        // Temmuz satışında (<%10 artış) enflasyon düzeltmesi yapılmamalı
+        expect(temmuzSatisi.adjustedProfit).toBeCloseTo(expectedTemmuzAdjustedProfit); 
+
+        // Ekim satışında (>=%10 artış) enflasyon düzeltmesi yapılmalı
+        expect(ekimSatisi.adjustedProfit).toBeCloseTo(expectedEkimAdjustedProfit, 2);
+    });
+
+
 }); 

@@ -127,14 +127,17 @@ class TaxCalculator {
             const sellYiufe = this.getPreviousYiufe(sellDate);
             
             const inflationRate = sellYiufe / buyYiufe;
-            const adjustedBuyValue = buyValue * inflationRate;
+            const inflationIncrease = ((sellYiufe - buyYiufe) / buyYiufe) * 100;
+            
+            // Yİ-ÜFE artışı %10 veya üzerinde ise enflasyon düzeltmesi uygula
+            const adjustedBuyValue = inflationIncrease >= 10 ? buyValue * inflationRate : buyValue;
             
             const profit = sellValue - buyValue;
-            const adjustedProfit = sellValue - adjustedBuyValue ;
+            const adjustedProfit = sellValue - adjustedBuyValue;
 
             const [day, month, year] = sellDate.split(' ')[0].split('/');
             const saleYear = "20" + year;
-            const taxableAmount = saleYear === this.vergiDonemi && adjustedProfit > 0 ? adjustedProfit : 0;
+            const taxableAmount = saleYear === this.vergiDonemi ? adjustedProfit : 0;
             totalTaxableAmount += taxableAmount;
             profitDetails.push({
                 buyDate: purchase.date,
@@ -197,6 +200,75 @@ class TaxCalculator {
     // Vergi oranını güncelleme
     setVergiOrani(vergiOrani) {
         this.vergiOrani = vergiOrani;
+    }
+
+    calculateTotalTaxableProfit(data) {
+        let allTransactions = [];
+        let totalTaxableProfit = 0;
+    
+        // Tüm işlemleri işleme
+        for (let row of data) {
+            // Null check ve işlem durumu kontrolü
+            if (!row || row.length < 11) {
+                console.warn("Geçersiz veya gerçekleşmemiş işlem:", row);
+                continue;
+            }
+    
+            // Sayısal değerlerin kontrolü
+            const amount = parseFloat(row[8]);
+            const price = parseFloat(row[9]);
+            const fee = parseFloat(row[10] || '0');
+    
+            if (amount && amount !== 0 && !isNaN(price)) {
+                // Check for negative amounts or prices
+                if (amount < 0 || price < 0) {
+                    throw new Error(`Negatif miktar veya fiyat geçersizdir: ${row}`);
+                }
+
+                const result = this.addTransaction(
+                    row[0],           // tarih
+                    row[2],           // sembol
+                    row[3],           // işlem tipi
+                    amount.toString(), // miktar
+                    price.toString(),  // fiyat
+                    fee.toString()    // komisyon
+                );
+                
+                if (result) {
+                    if (result.type === 'purchase') {
+                        allTransactions.push({
+                            ...row,
+                            type: 'original',
+                            vergiDonemi: "20" + row[0].split('/')[2].split(' ')[0]
+                        });
+                    } else if (result.type === 'sale') {
+                        const [day, month, year] = row[0].split(' ')[0].split('/');
+                        const islemYili = "20" + year;
+                        
+                        result.details.forEach(detail => {
+                            totalTaxableProfit += detail.taxableAmount || 0;
+                            
+                            const transaction = {
+                                ...row,
+                                type: 'split',
+                                vergiDonemi: islemYili,
+                                amount: detail.amount,
+                                buyDate: detail.buyDate,
+                                buyPrice: detail.buyPrice,
+                                adjustedProfit: detail.adjustedProfit,
+                                buyExchangeRate: detail.buyExchangeRate,
+                                sellExchangeRate: detail.sellExchangeRate,
+                                buyYiufe: detail.buyYiufe,
+                                sellYiufe: detail.sellYiufe,
+                                buyValue: detail.buyValue
+                            };
+                            allTransactions.push(transaction);
+                        });
+                    }
+                }
+            }
+        }
+        return { allTransactions, totalTaxableProfit };
     }
 }
 

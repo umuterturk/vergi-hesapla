@@ -1,10 +1,13 @@
-const DEBUG_MODE = false;
-const SHOW_BUY_ME_COFFEE = true;
-
 // Global calculator instance
 let calculator = null;
 
 let activeWarnings = new Set(); // To store unique warnings
+
+// Güvenli bir şekilde sayısal değerleri formatla
+function formatNumber(value, decimals = 2) {
+    if (value === null || value === undefined || isNaN(value)) return '-';
+    return parseFloat(value).toFixed(decimals);
+}
 
 document.getElementById('uploadPdf').addEventListener('change', function(event) {
     const files = event.target.files;
@@ -207,6 +210,8 @@ function parseYiufeData(yiufeText) {
     return yiufeMap;
 }
 
+
+
 function displayTable(data) {
     // Clear warnings when starting new calculation
     activeWarnings.clear();
@@ -228,129 +233,64 @@ function displayTable(data) {
         showWarning // Pass the UI warning function
     );
     
-    let allTransactions = [];
-    let totalTaxableProfit = 0;
-    let hasError = false;
+
     
     try {
-        // Tüm işlemleri işleme
-        for (let row of data) {
-            debug_log("İşlenen satır:", row);
-            
-            // Null check ve işlem durumu kontrolü
-            if (!row || row.length < 11) {
-                console.warn("Geçersiz veya gerçekleşmemiş işlem:", row);
-                continue;
-            }
+        const { allTransactions, totalTaxableProfit } = calculator.calculateTotalTaxableProfit(data, calculator);
+        debug_log("İşlenmiş işlemler:", allTransactions);
 
-            // Sayısal değerlerin kontrolü
-            const amount = parseFloat(row[8]);
-            const price = parseFloat(row[9]);
-            const fee = parseFloat(row[10] || '0');
-
-            if (amount && amount !== 0 && !isNaN(price)) {
-                const result = calculator.addTransaction(
-                    row[0],           // tarih
-                    row[2],           // sembol
-                    row[3],           // işlem tipi
-                    amount.toString(), // miktar
-                    price.toString(),  // fiyat
-                    fee.toString()    // komisyon
-                );
-                
-                debug_log("İşlem sonucu:", result);
-
-                if (result) {
-                    if (result.type === 'purchase') {
-                        allTransactions.push({
-                            ...row,
-                            type: 'original',
-                            vergiDonemi: "20" + row[0].split('/')[2].split(' ')[0]
-                        });
-                        debug_log("Alış işlemi eklendi:", allTransactions[allTransactions.length - 1]);
-                    } else if (result.type === 'sale') {
-                        const [day, month, year] = row[0].split(' ')[0].split('/');
-                        const islemYili = "20" + year;
-                        
-                        result.details.forEach(detail => {
-                            totalTaxableProfit += detail.taxableAmount || 0;
-                            
-                            const transaction = {
-                                ...row,
-                                type: 'split',
-                                vergiDonemi: islemYili,
-                                amount: detail.amount,
-                                buyDate: detail.buyDate,
-                                buyPrice: detail.buyPrice,
-                                adjustedProfit: detail.adjustedProfit,
-                                buyExchangeRate: detail.buyExchangeRate,
-                                sellExchangeRate: detail.sellExchangeRate,
-                                buyYiufe: detail.buyYiufe,
-                                sellYiufe: detail.sellYiufe,
-                                buyValue: detail.buyValue
-                            };
-                            allTransactions.push(transaction);
-                            debug_log("Satış işlemi eklendi:", transaction);
-                        });
-                    }
-                }
-            }
+        if (allTransactions.length === 0) {
+            showError("İşlenebilecek işlem bulunamadı.");
+            return;
         }
-    } catch (error) {
-        console.error("Hata oluştu:", error);
-        showError(error.message);
-        hasError = true;
-        return;
-    }
 
-    debug_log("İşlenmiş işlemler:", allTransactions);
-
-    if (hasError || allTransactions.length === 0) {
-        showError("İşlenebilecek işlem bulunamadı veya bir hata oluştu.");
-        return;
-    }
-
-    // Özet HTML oluşturma
-    let summaryHtml = `
+        // Özet HTML oluşturma
+        let summaryHtml = `
         <div class="summary-container">
             <strong>Toplam Vergiye Tabi Kazanç (TL): 
                 <span class="${totalTaxableProfit >= 0 ? 'positive-value' : 'negative-value'}">
-                    ${totalTaxableProfit.toFixed(2)}
+                    ${formatNumber(totalTaxableProfit)}
                 </span>
             </strong>
             <strong>Ödenecek Vergi (%${vergiOrani * 100}) (TL): 
-                <span style="color: #dc3545">
-                    ${(totalTaxableProfit * vergiOrani).toFixed(2)}
+                <span class="${totalTaxableProfit >= 0 ? 'negative-value' : 'positive-value'}">
+                    ${formatNumber(totalTaxableProfit * vergiOrani)}
                 </span>
             </strong>
             <strong>Vergi Sonrası Toplam Kazanç (TL): 
                 <span class="${(totalTaxableProfit * (1 - vergiOrani)) >= 0 ? 'positive-value' : 'negative-value'}">
-                    ${(totalTaxableProfit * (1 - vergiOrani)).toFixed(2)}
+                    ${formatNumber(totalTaxableProfit * (1 - vergiOrani))}
                 </span>
             </strong>
         </div>
         <div class="table-container">
     `;
 
-    // Tablo HTML oluşturma
-    let tableHtml = createTableHeader();
-    
-    for (let transaction of allTransactions) {
-        tableHtml += createTableRow(transaction);
+        // Tablo HTML oluşturma
+        let tableHtml = createTableHeader();
+
+        for (let transaction of allTransactions) {
+            tableHtml += createTableRow(transaction);
+        }
+
+        tableHtml += '</tbody></table></div>';
+
+        // DOM'u güncelle
+        document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
+
+        // İndirme butonlarını göster/gizle
+        const downloadButtons = document.querySelectorAll('.download-button');
+        downloadButtons.forEach(button => {
+            button.style.display = allTransactions.length > 0 ? 'inline-block' : 'none';
+        });
+
+        updateWarningsDisplay();
+    } catch (error) {
+        console.error("Hata oluştu:", error);
+        showError(error.message);
+        return;
     }
-    
-    tableHtml += '</tbody></table></div>';
 
-    // DOM'u güncelle
-    document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
-
-    // İndirme butonlarını göster/gizle
-    const downloadButtons = document.querySelectorAll('.download-button');
-    downloadButtons.forEach(button => {
-        button.style.display = allTransactions.length > 0 ? 'inline-block' : 'none';
-    });
-
-    updateWarningsDisplay();
 }
 
 function createTableHeader() {
@@ -394,12 +334,6 @@ function createTableHeader() {
 function createTableRow(transaction) {
     const isSale = transaction.type === 'split';  // 'isSatis' yerine 'isSale' kullanılacak
     
-    // Güvenli bir şekilde sayısal değerleri formatla
-    const formatNumber = (value, decimals = 2) => {
-        if (value === null || value === undefined || isNaN(value)) return '-';
-        return parseFloat(value).toFixed(decimals);
-    };
-
     // Kur ve Yİ-ÜFE değerlerini güvenli bir şekilde al
     const buyExchangeRate = isSale && transaction.buyExchangeRate ? formatNumber(transaction.buyExchangeRate, 4) : '-';
     const sellExchangeRate = isSale && transaction.sellExchangeRate ? formatNumber(transaction.sellExchangeRate, 4) : '-';
@@ -475,8 +409,8 @@ function createTableRow(transaction) {
                     kazanc = satisTutari - nominal;
                 }
                 
-                // Sadece kar varsa vergiye tabi kazanç olarak göster
-                vergiyeTabiKazanc = kazanc > 0 ? formatNumber(kazanc) : '0.00';
+                // Show all taxable amounts, including negative ones
+                vergiyeTabiKazanc = formatNumber(kazanc);
             }
         }
     }
@@ -490,19 +424,17 @@ function createTableRow(transaction) {
         const [day, month, year] = transaction[0].split(' ')[0].split('/');
         const satisYili = "20" + year;
         
-        if (vergiyeTabiKazanc !== '-' && parseFloat(vergiyeTabiKazanc) > 0) {
+        if (vergiyeTabiKazanc !== '-') {
             if (satisYili === vergiDonemi) {
                 vergiTutari = (parseFloat(vergiyeTabiKazanc) * vergiOrani).toFixed(2);
             } else {
                 vergiTutari = `0 (${vergiDonemi} için)`;
             }
-        } else if (vergiyeTabiKazanc !== '-') {
-            vergiTutari = '0.00';
         }
     }
 
     // Vergi tutarı için stil belirleme
-    const vergiStyle = vergiTutari !== '-' && !vergiTutari.includes('için') && parseFloat(vergiTutari) > 0 
+    const vergiStyle = vergiTutari !== '-' && !vergiTutari.includes('için') && parseFloat(vergiTutari) !== 0 
         ? 'style="color: #dc3545; font-weight: bold;"' 
         : '';
 
