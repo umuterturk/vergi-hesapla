@@ -14,8 +14,15 @@ class TaxCalculator {
         // Tarih dizesini gün, ay ve yıl olarak ayır
         const [day, month, year] = dateStr.split('/');
         const date = new Date(20 + year, month-1, day); // javascript date GG
+        // 1 gun onceki tarih
+        date.setDate(date.getDate() - 1);
         
-        const prevDateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD formatı
+        // Format date manually to YYYY-MM-DD
+        const formattedYear = date.getFullYear();
+        const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+        const formattedDay = String(date.getDate()).padStart(2, '0');
+        const prevDateStr = `${formattedYear}-${formattedMonth}-${formattedDay}`;
+
         if (this.tcmbRates[prevDateStr]) {
             return this.tcmbRates[prevDateStr];
         }

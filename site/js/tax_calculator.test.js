@@ -1,5 +1,30 @@
 const TaxCalculator = require('./tax_calculator.js');
-const { SAMPLE_YIUFE_DATA, SAMPLE_TCMB_RATES } = require('./test_data.js');
+
+const SAMPLE_YIUFE_DATA = {
+    '202212': 100.00,
+    '202301': 200.00,
+    '202302': 300.00,
+    '202303': 400.00,
+    '202304': 500.00,
+    '202305': 600.00,
+    '202306': 700.00,
+    '202402': 800.00,
+    '202406': 900.00,
+};
+
+// Örnek test verisi - Günlük TCMB kurları
+const SAMPLE_TCMB_RATES = {
+    '2021-12-31': 5.00,
+    '2023-01-14': 10.00,
+    '2023-02-14': 15.00,
+    '2023-03-14': 20.00,
+    '2023-04-14': 25.00,
+    '2023-05-14': 30.00,
+    '2023-06-14': 35.00,
+    '2023-07-14': 140.00,
+    '2024-03-14': 145.00,
+    '2024-07-14': 150.00,
+};
 
 describe('TaxCalculator', () => {
     let calculator;
@@ -26,8 +51,8 @@ describe('TaxCalculator', () => {
     });
 
     test('önceki döviz kurunu doğru almalı', () => {
-        const rate = calculator.getPreviousExchangeRate('15/03/23 10:10:00');
-        expect(rate).toBe(20.00); 
+        const rate = calculator.getPreviousExchangeRate('01/01/22 10:10:00');
+        expect(rate).toBe(5.00); 
         expect(warnings).toEqual([]);
     });
 
@@ -39,8 +64,8 @@ describe('TaxCalculator', () => {
     });
 
     test('önceki Yİ-UFE değerini doğru almalı', () => {
-        const yiufe = calculator.getPreviousYiufe('15/03/23');
-        expect(yiufe).toBe(300.00); // Should get February value
+        const yiufe = calculator.getPreviousYiufe('31/01/23');
+        expect(yiufe).toBe(100.00); // Should get February value
         expect(warnings).toEqual([]);
     });
 
