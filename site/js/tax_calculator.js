@@ -20,7 +20,7 @@ class TaxCalculator {
             return this.tcmbRates[prevDateStr];
         }
     
-        throw new Error(`Tarih için döviz kuru bulunamadı: ${dateStr}`);
+        throw new Error(`Tarih için döviz kuru bulunamadı: ${dateStr} ${prevDateStr} ${date} ${this.tcmbRates}`);
     }
 
     // Önceki ayın Yİ-UFE değerini almak için
