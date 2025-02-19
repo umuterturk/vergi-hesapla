@@ -47,12 +47,10 @@ input[type="file"] {
 
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
     background-color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 th, td {
@@ -615,16 +613,29 @@ input[type="file"] {
     position: relative;
 }
 
-table thead tr:first-child th,
-table thead tr:nth-child(2) th {
+thead.sticky-header {
     position: sticky;
     top: 0;
     z-index: 2;
     background-color: #f8f9fa;
 }
 
-table thead tr:first-child th {
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 2;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-header tr:first-child th {
+    top: 0;
     z-index: 3;
+}
+
+.sticky-header tr:nth-child(2) th {
+    top: 39px; /* Adjust this value based on the height of your first header row */
+    z-index: 2;
 }
 
 /* Belirli kolonları gizle ama verileri koru */
@@ -735,29 +746,13 @@ table td:nth-child(18) {
 }
 
 .table-container {
+    overflow-x: auto;
     max-height: 70vh;
     overflow-y: auto;
-    margin-top: 20px;
     position: relative;
-}
-
-.sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.sticky-header th {
-    background-color: white;
+    margin-top: 20px;
+    border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.sticky-header tr:first-child th {
-    border-bottom: none;
-}
-
-.sticky-header tr:last-child th {
-    border-top: none;
 }
 
 .warnings-container {

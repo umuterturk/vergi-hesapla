@@ -210,8 +210,6 @@ function parseYiufeData(yiufeText) {
     return yiufeMap;
 }
 
-
-
 function displayTable(data) {
     // Clear warnings when starting new calculation
     activeWarnings.clear();
@@ -232,8 +230,6 @@ function displayTable(data) {
         vergiOrani,
         showWarning // Pass the UI warning function
     );
-    
-
     
     try {
         const { allTransactions, totalTaxableProfit } = calculator.calculateTotalTaxableProfit(data, calculator);
@@ -266,31 +262,24 @@ function displayTable(data) {
         <div class="table-container">
     `;
 
-        // Tablo HTML oluşturma
-        let tableHtml = createTableHeader();
+        // Tablo HTML'ini oluştur
+        let tableHtml = `<div class="table-container">`;
+        tableHtml += createTableHeader();
 
-        for (let transaction of allTransactions) {
+        // İşlemleri tabloya ekle
+        allTransactions.forEach(transaction => {
             tableHtml += createTableRow(transaction);
-        }
-
-        tableHtml += '</tbody></table></div>';
-
-        // DOM'u güncelle
-        document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
-
-        // İndirme butonlarını göster/gizle
-        const downloadButtons = document.querySelectorAll('.download-button');
-        downloadButtons.forEach(button => {
-            button.style.display = allTransactions.length > 0 ? 'inline-block' : 'none';
         });
 
-        updateWarningsDisplay();
-    } catch (error) {
-        console.error("Hata oluştu:", error);
-        showError(error.message);
-        return;
-    }
+        tableHtml += `</tbody></table></div>`;
 
+        // HTML'i sayfaya ekle
+        document.getElementById('tableContainer').innerHTML = summaryHtml + tableHtml;
+
+    } catch (error) {
+        console.error("Hesaplama hatası:", error);
+        showError("Hesaplama sırasında bir hata oluştu: " + error.message);
+    }
 }
 
 function createTableHeader() {
@@ -435,8 +424,8 @@ function createTableRow(transaction) {
 
     // Vergi tutarı için stil belirleme
     const vergiStyle = vergiTutari !== '-' && !vergiTutari.includes('için') && parseFloat(vergiTutari) !== 0 
-        ? 'style="color: #dc3545; font-weight: bold;"' 
-        : '';
+        ? parseFloat(vergiTutari) < 0 ? 'style="color: #28a745; font-weight: bold;"' : 'style="color: #dc3545; font-weight: bold;"' 
+        :  '';
 
     // Adet değerini tabloda gösterirken 2 hane, veri olarak tam haliyle sakla
     const amount = isSale ? transaction.amount : transaction[8];
