@@ -115,6 +115,39 @@ document.getElementById('popup').addEventListener('click', function(e) {
     }
 });
 
+// Temettü uyarı popup'ı için fonksiyonlar
+function showDividendWarningPopup() {
+    // LocalStorage'da kaydedilmiş değeri kontrol et
+    if (!localStorage.getItem('dividendWarningAccepted')) {
+        document.getElementById('dividendWarningPopup').style.display = 'flex';
+        
+        // Checkbox'ı dinle
+        document.getElementById('dividendWarningCheckbox').addEventListener('change', function() {
+            document.getElementById('dividendWarningButton').disabled = !this.checked;
+        });
+        
+    }
+}
+
+function closeDividendWarningPopup() {
+    // Checkbox işaretliyse localStorage'a kaydet
+    if (document.getElementById('dividendWarningCheckbox').checked) {
+        localStorage.setItem('dividendWarningAccepted', 'true');
+    }
+    document.getElementById('dividendWarningPopup').style.display = 'none';
+}
+
+// Sayfa yüklendiğinde dividend warning popup'ını göster
+document.addEventListener('DOMContentLoaded', function() {
+    showDividendWarningPopup();
+});
+
+// Test için dividend warning kabul durumunu sıfırlama fonksiyonu
+function resetDividendWarningAcceptance() {
+    localStorage.removeItem('dividendWarningAccepted');
+    alert('Temettü uyarısı sıfırlandı. Sayfayı yenileyin.');
+}
+
 function debug_log(message) {
     if (DEBUG_MODE) {
         console.log(message);
