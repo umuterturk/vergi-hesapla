@@ -166,17 +166,6 @@
                 <button onclick="closePopup()" class="popup-close">Tamam</button>
             </div>
         </div>
-
-        <div id="dividendWarningPopup" class="popup">
-            <div class="popup-content">
-                <p><i class="fas fa-info-circle"></i> Bu sitede Temettü gelirleri hesaplanmamaktadır, sadece Döviz bazlı yatırım işlem vegileri hesaplanmaktadır.</p>
-                <div class="disclaimer-checkbox">
-                    <input type="checkbox" id="dividendWarningCheckbox">
-                    <label for="dividendWarningCheckbox">Anladım</label>
-                </div>
-                <button id="dividendWarningButton" onclick="closeDividendWarningPopup()" class="popup-close">Tamam</button>
-            </div>
-        </div>
     </div>
 
     <!-- Scripts -->
@@ -187,10 +176,5 @@
     <script src="js/data.js"></script>
     <script src="js/view.js"></script>
     <script src="js/tax_calculator.js"></script>
-    
-    <!-- Test için temettü uyarısını sıfırlama linki -->
-    <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #6c757d;">
-        <a href="#" onclick="resetDividendWarningAcceptance(); return false;" style="color: #6c757d; text-decoration: underline;">Temettü uyarısını sıfırla</a>
-    </div>
 </body>
 </html>
